@@ -97,14 +97,17 @@ pipeline {
 
                         if (params.UPLOAD_TO_SSC) {
                             // Remote analysis (using Scan Central) and upload to SSC
-                            def runScan = fortifyRemoteAnalysis remoteAnalysisProjectType: fortifyMaven(buildFile: 'pom.xml'),
+                            fortifyRemoteAnalysis remoteAnalysisProjectType: fortifyMaven(buildFile: 'pom.xml'),
                                 remoteOptionalConfig: [                                            
                                     sensorPoolUUID: "${env.SSC_SENSOR_POOL_UUID}"
                                 ],
                                 uploadSSC: [appName: "${env.APP_NAME}", appVersion: "${env.SSC_APP_VERSION_ID}"]
                            
-                            echo "Response: " + runScan
-
+                            // Find the SSC scan token to be used for retrieveing scan status on the subsequent jobs
+                            def consoleOutput = currentBuild.rawBuild.getLog(10)
+                            for (item in consoleOutput)
+                                echo item
+                                 
                         } else {
                             // Remote analysis (using Scan Central)
                             fortifyRemoteAnalysis remoteAnalysisProjectType: fortifyMaven(buildFile: 'pom.xml'),
