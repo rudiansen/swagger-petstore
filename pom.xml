@@ -222,4 +222,64 @@
         <junit-version>4.8.2</junit-version>
         <slf4j-version>1.6.3</slf4j-version>
     </properties>
+
+    <profiles>
+        <!-- Example profile for preparing files for Fortify scans -->
+        <!-- Note: recommended approach now is to use ScanCentral Client Tool for packaging -->
+        <profile>
+            <id>fortify</id>
+            <properties>
+                <packaging.type>war</packaging.type>
+            </properties>
+            <build>
+                <plugins>
+                    <!-- Download and copy all dependencies on "verify" phase for Fortify On Demand -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <version>3.1.1</version>
+                        <executions>
+                            <execution>
+                                <id>download-sources</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>sources</goal>
+                                </goals>
+                                <configuration>
+                                    <overWriteIfNewer>true</overWriteIfNewer>
+                                    <excludeGroupIds>
+                                        junit,org.easymock,${project.groupId}
+                                    </excludeGroupIds>
+                                    <!-- uncomment to only include direct dependencies -->
+                                    <excludeTransitive>false</excludeTransitive>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>copy-dependencies</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>copy-dependencies</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>target/classes/lib</outputDirectory>
+                                    <!--classifier>sources</classifier-->
+                                    <overWriteIfNewer>true</overWriteIfNewer>
+                                    <excludeGroupIds>
+                                        junit,org.easymock,${project.groupId}
+                                    </excludeGroupIds>
+                                    <!-- uncomment to only include direct dependencies -->
+                                    <excludeTransitive>false</excludeTransitive>
+                                </configuration>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <verbose>true</verbose>
+                            <detail>true</detail>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
+                        </configuration>
+                    </plugin>                                        
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

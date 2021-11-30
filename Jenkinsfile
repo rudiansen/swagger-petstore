@@ -52,9 +52,9 @@ pipeline {
 
                     // Run maven to build WAR/JAR application
                     if (isUnix()) {
-                        sh 'mvn "-Dskip.unit.tests=false" -Dtest="*Test,!PasswordConstraintValidatorTest,!UserServiceTest,!DefaultControllerTest,!SeleniumFlowIT" -P jar -B clean verify package --file pom.xml'
+                        sh 'mvn "-Dskip.unit.tests=false" -Dtest="*Test,!PasswordConstraintValidatorTest,!UserServiceTest,!DefaultControllerTest,!SeleniumFlowIT" -B clean verify package --file pom.xml'
                     } else {
-                        bat "mvn \"-Dskip.unit.tests=false\" Dtest=\"*Test,!PasswordConstraintValidatorTest,!UserServiceTest,!DefaultControllerTest,!SeleniumFlowIT\" -P jar -B clean verify package --file pom.xml"
+                        bat "mvn \"-Dskip.unit.tests=false\" Dtest=\"*Test,!PasswordConstraintValidatorTest,!UserServiceTest,!DefaultControllerTest,!SeleniumFlowIT\" -B clean verify package --file pom.xml"
                     }
                 }
             }
@@ -62,9 +62,9 @@ pipeline {
             post {
                 success {                   
                     // Archive the built file
-                    archiveArtifacts "target/${env.COMPONENT_NAME}.jar,target/${env.COMPONENT_NAME}.war"
+                    archiveArtifacts "target/${env.COMPONENT_NAME}.war"
                     // Stash the deployable files
-                    stash includes: "target/${env.COMPONENT_NAME}.jar,target/${env.COMPONENT_NAME}.war", name: "${env.COMPONENT_NAME}_release"
+                    stash includes: "target/${env.COMPONENT_NAME}.war", name: "${env.COMPONENT_NAME}_release"
                 }
             }
         }
