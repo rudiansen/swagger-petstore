@@ -45,12 +45,10 @@ pipeline {
                     } else {
                         bat(/git rev-parse HEAD > .git\\commit-id/)
                     }
-                    //bat(/git log --format="%ae" | head -1 > .git\commit-author/)
-                    env.GIT_COMMIT_ID = readFile('.git/commit-id').trim()
-                    env.GIT_COMMIT_AUTHOR = readFile('.git/commit-author').trim()
+                    
+                    env.GIT_COMMIT_ID = readFile('.git/commit-id').trim()                    
 
-                    println "Git commit id: ${env.GIT_COMMIT_ID}"
-                    println "Git commit author: ${env.GIT_COMMIT_AUTHOR}"
+                    println "Git commit id: ${env.GIT_COMMIT_ID}"                    
 
                     // Run maven to build WAR/JAR application
                     if (isUnix()) {
