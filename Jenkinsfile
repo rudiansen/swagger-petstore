@@ -101,11 +101,7 @@ pipeline {
                                 remoteOptionalConfig: [                                            
                                     sensorPoolUUID: "${env.SSC_SENSOR_POOL_UUID}"
                                 ],
-                                uploadSSC: [appName: "${env.APP_NAME}", appVersion: "${env.SSC_APP_VERSION_ID}"]
-
-                            // Process to get Scan token from output console
-                            def outputScan = currentBuild.rawBuild.getLog(10)
-                            println $outputScan                                                                                                            
+                                uploadSSC: [appName: "${env.APP_NAME}", appVersion: "${env.SSC_APP_VERSION_ID}"]                                                                                                                                     
 
                         } else {
                             // Remote analysis (using Scan Central)
