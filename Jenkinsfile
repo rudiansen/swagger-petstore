@@ -27,7 +27,7 @@ pipeline {
 
         // The following are defaulted and can be overriden by creating a "Build parameter" of the same name
         SSC_URL = "${params.SSC_URL ?: 'http://10.87.1.12:8080/ssc'}" // URL of Fortify Software Security Center
-        SSC_APP_VERSION_ID = "${params.SSC_APP_VERSION_ID ?: '100'}" // Id of Application in SSC to upload results to
+        SSC_APP_VERSION_ID = "${params.SSC_APP_VERSION_ID ?: '1001'}" // Id of Application in SSC to upload results to
         SSC_NOTIFY_EMAIL = "${params.SSC_NOTIFY_EMAIL ?: 'rudiansen.gunawan@packet-systems.com'}" // User to notify with SSC/ScanCentral information
         SSC_SENSOR_POOL_UUID = "${params.SSC_SENSOR_POOL_UUID ?: '00000000-0000-0000-0000-000000000002'}" // UUID of Scan Central Sensor Pool to use - leave for Default Pool        
     }
