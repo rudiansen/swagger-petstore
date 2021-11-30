@@ -16,7 +16,8 @@ pipeline {
     
     environment {
         // Application settings
-        APP_NAME = "Swagger-PetStore"        
+        APP_NAME = "Swagger-PetStore"
+        APP_VER = "1.0.7"     
         COMPONENT_NAME = "swagger-petstore"
         GIT_URL = scm.getUserRemoteConfigs()[0].getUrl()
         JAVA_VERSION = 8
@@ -62,9 +63,9 @@ pipeline {
             post {
                 success {                   
                     // Archive the built file
-                    archiveArtifacts "target/${env.COMPONENT_NAME}.war"
+                    archiveArtifacts "target/${env.COMPONENT_NAME}-${env.APP_VER}.war"
                     // Stash the deployable files
-                    stash includes: "target/${env.COMPONENT_NAME}.war", name: "${env.COMPONENT_NAME}_release"
+                    stash includes: "target/${env.COMPONENT_NAME}-${env.APP_VER}.war", name: "${env.COMPONENT_NAME}-${env.APP_VER}_release"
                 }
             }
         }
