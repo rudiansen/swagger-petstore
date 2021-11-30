@@ -101,13 +101,8 @@ pipeline {
                                 remoteOptionalConfig: [                                            
                                     sensorPoolUUID: "${env.SSC_SENSOR_POOL_UUID}"
                                 ],
-                                uploadSSC: [appName: "${env.APP_NAME}", appVersion: "${env.SSC_APP_VERSION_ID}"]
-                           
-                            // Find the SSC scan token to be used for retrieveing scan status on the subsequent jobs
-                            def consoleOutput = currentBuild.rawBuild.getLog(10)
-                            for (item in consoleOutput)
-                                echo item
-                                 
+                                uploadSSC: [appName: "${env.APP_NAME}", appVersion: "${env.SSC_APP_VERSION_ID}"]                                                       
+
                         } else {
                             // Remote analysis (using Scan Central)
                             fortifyRemoteAnalysis remoteAnalysisProjectType: fortifyMaven(buildFile: 'pom.xml'),
@@ -119,6 +114,11 @@ pipeline {
                         println "No Static Application Security Testing (SAST) to do."
                     }
                 }
+
+                // Process to get Scan token from output console
+                def outputScan = currentBuild.rawBuild.getLog(10)
+                for (line in outputScan)
+                    echo line
             }
         }
     }    
