@@ -52,9 +52,9 @@ pipeline {
 
                     // Run maven to build WAR/JAR application
                     if (isUnix()) {
-                        sh 'mvn "-Dskip.unit.tests=false" -Dtest="*Test,!PasswordConstraintValidatorTest,!UserServiceTest,!DefaultControllerTest,!SeleniumFlowIT" -B clean verify package --file pom.xml'
+                        sh 'mvn "-Dskip.unit.tests=false" -Dtest="*Test,!PasswordConstraintValidatorTest,!UserServiceTest,!DefaultControllerTest,!SeleniumFlowIT" -DfailIfNoTests=false -B clean verify package --file pom.xml'
                     } else {
-                        bat "mvn \"-Dskip.unit.tests=false\" Dtest=\"*Test,!PasswordConstraintValidatorTest,!UserServiceTest,!DefaultControllerTest,!SeleniumFlowIT\" -B clean verify package --file pom.xml"
+                        bat "mvn \"-Dskip.unit.tests=false\" Dtest=\"*Test,!PasswordConstraintValidatorTest,!UserServiceTest,!DefaultControllerTest,!SeleniumFlowIT\" -DfailIfNoTests=false -B clean verify package --file pom.xml"
                     }
                 }
             }
