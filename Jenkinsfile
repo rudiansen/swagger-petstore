@@ -27,8 +27,7 @@ pipeline {
 
         // The following are defaulted and can be overriden by creating a "Build parameter" of the same name
         SSC_URL = "${params.SSC_URL ?: 'http://10.87.1.12:8080/ssc'}" // URL of Fortify Software Security Center
-        SSC_APP_VERSION_ID = "${params.SSC_APP_VERSION_ID ?: '1001'}" // Id of Application in SSC to upload results to
-        SSC_NOTIFY_EMAIL = "${params.SSC_NOTIFY_EMAIL ?: 'rudiansen.gunawan@packet-systems.com'}" // User to notify with SSC/ScanCentral information
+        SSC_APP_VERSION_ID = "${params.SSC_APP_VERSION_ID ?: '1001'}" // Id of Application in SSC to upload results to        
         SSC_SENSOR_POOL_UUID = "${params.SSC_SENSOR_POOL_UUID ?: '00000000-0000-0000-0000-000000000002'}" // UUID of Scan Central Sensor Pool to use - leave for Default Pool        
     }
 
@@ -98,24 +97,20 @@ pipeline {
 
                         if (params.UPLOAD_TO_SSC) {
                             // Remote analysis (using Scan Central) and upload to SSC
-                            fortifyRemoteAnalysis remoteAnalysisProjectType: fortifyMaven(buildFile: 'pom.xml'),
-                                    remoteOptionalConfig: [
-                                            customRulepacks: '',
-                                            filterFile: "etc\\sca-filter.txt",
-                                            notifyEmail: "${env.SSC_NOTIFY_EMAIL}",
-                                            sensorPoolUUID: "${env.SSC_SENSOR_POOL_UUID}"
-                                    ],
-                                    uploadSSC: [appName: "${env.APP_NAME}", appVersion: "${env.SSC_APP_VERSION_ID}"]
+                            def runScan = fortifyRemoteAnalysis remoteAnalysisProjectType: fortifyMaven(buildFile: 'pom.xml'),
+                                remoteOptionalConfig: [                                            
+                                    sensorPoolUUID: "${env.SSC_SENSOR_POOL_UUID}"
+                                ],
+                                uploadSSC: [appName: "${env.APP_NAME}", appVersion: "${env.SSC_APP_VERSION_ID}"]
+                           
+                            echo "Response: " + runScan
 
                         } else {
                             // Remote analysis (using Scan Central)
                             fortifyRemoteAnalysis remoteAnalysisProjectType: fortifyMaven(buildFile: 'pom.xml'),
-                                    remoteOptionalConfig: [
-                                            customRulepacks: '',
-                                            filterFile: "etc\\sca-filter.txt",
-                                            notifyEmail: "${env.SSC_NOTIFY_EMAIL}",
-                                            sensorPoolUUID: "${env.SSC_SENSOR_POOL_UUID}"
-                                    ]
+                                remoteOptionalConfig: [                                            
+                                    sensorPoolUUID: "${env.SSC_SENSOR_POOL_UUID}"
+                                ]
                         }                    
                     } else {
                         println "No Static Application Security Testing (SAST) to do."
