@@ -62,17 +62,11 @@ pipeline {
             }
 
             post {
-                success {
-                    // Record the test results (success)
-                    junit "**/target/surefire-reports/TEST-*.xml"
+                success {                   
                     // Archive the built file
                     archiveArtifacts "target/${env.COMPONENT_NAME}.jar,target/${env.COMPONENT_NAME}.war"
                     // Stash the deployable files
                     stash includes: "target/${env.COMPONENT_NAME}.jar,target/${env.COMPONENT_NAME}.war", name: "${env.COMPONENT_NAME}_release"
-                }
-                failure {
-                    // Record the test results (failures)
-                    junit "**/target/surefire-reports/TEST-*.xml"
                 }
             }
         }
