@@ -101,7 +101,13 @@ pipeline {
                                 remoteOptionalConfig: [                                            
                                     sensorPoolUUID: "${env.SSC_SENSOR_POOL_UUID}"
                                 ],
-                                uploadSSC: [appName: "${env.APP_NAME}", appVersion: "${env.SSC_APP_VERSION_ID}"]                                                       
+                                uploadSSC: [appName: "${env.APP_NAME}", appVersion: "${env.SSC_APP_VERSION_ID}"]
+
+                                // Process to get Scan token from output console
+                                def outputScan = currentBuild.rawBuild.getLog(10)
+                                for (line in $outputScan) {
+                                    println $line
+                                }                                                                                    
 
                         } else {
                             // Remote analysis (using Scan Central)
@@ -113,12 +119,7 @@ pipeline {
                     } else {
                         println "No Static Application Security Testing (SAST) to do."
                     }
-                }
-
-                // Process to get Scan token from output console
-                def outputScan = currentBuild.rawBuild.getLog(10)
-                for (line in outputScan)
-                    echo line
+                }                
             }
         }
     }    
