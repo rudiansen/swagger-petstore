@@ -52,11 +52,11 @@ pipeline {
                     println "Git commit id: ${env.GIT_COMMIT_ID}"                    
 
                     // Run maven to build WAR/JAR application
-                    // if (isUnix()) {
-                    //     sh 'mvn "-Dskip.unit.tests=false" -Dtest="*Test,!PasswordConstraintValidatorTest,!UserServiceTest,!DefaultControllerTest,!SeleniumFlowIT" -DfailIfNoTests=false -B clean verify package --file pom.xml'
-                    // } else {
-                    //     bat "mvn \"-Dskip.unit.tests=false\" Dtest=\"*Test,!PasswordConstraintValidatorTest,!UserServiceTest,!DefaultControllerTest,!SeleniumFlowIT\" -DfailIfNoTests=false -B clean verify package --file pom.xml"
-                    // }
+                    if (isUnix()) {
+                        sh 'mvn "-Dskip.unit.tests=false" -Dtest="*Test,!PasswordConstraintValidatorTest,!UserServiceTest,!DefaultControllerTest,!SeleniumFlowIT" -DfailIfNoTests=false -B clean verify package --file pom.xml'
+                    } else {
+                        bat "mvn \"-Dskip.unit.tests=false\" Dtest=\"*Test,!PasswordConstraintValidatorTest,!UserServiceTest,!DefaultControllerTest,!SeleniumFlowIT\" -DfailIfNoTests=false -B clean verify package --file pom.xml"
+                    }
                 }
             }
 
@@ -70,11 +70,8 @@ pipeline {
             }
         }
 
-        stage('Fortify ScanCentral Scan - SAST') {           
+        stage('Fortify ScanCentral - SAST') {           
             steps {
-
-                sh 'rm -rf ./scantoken.txt'
-
                 script {
                     // Get code from Git repository so we can recompile it                    
                     // git branch: 'poc-sss', url: 'https://github.com/rudiansen/swagger-petstore'
@@ -127,7 +124,7 @@ pipeline {
                             if (scanToken != null) {
                                 println "Received scan token: ${scanToken}"
                                 // Write scan token to a file
-                                echo '"${scanToken}" >> ./scantoken.txt'
+                                echo '"${scanToken}" > ./scantoken.txt'
                             }
                         }
                     }                                                           
@@ -138,42 +135,34 @@ pipeline {
 
                 pwsh 'Get-Content "./scantoken.txt"'
 
-                //  Check scanning status until it's completed
-                pwsh '/home/fortify/bin/scancentral -url http://10.87.1.12:8090/scancentral-ctrl status -token (Get-Content "./scantoken.txt")'
-                
-                script {
-                    checkScanStatus()
-                }                                      
+                //  Check scanning status until it's completed                
+                pwsh returnStatus: true, script: './powershell/check_scan_status.ps1'                                      
             }
         }
 
-        stage("App Deployment using Octopus Deploy") {
+        stage("Build Docker image and push to Nexus Repo") {
             steps {
-
-                pwsh 'Write-Output "The steps for Octopus Deployment go here..."'
+                // Build Docker image
+                sh "docker build -t ${env.COMPONENT_NAME}:${env.APP_VER} ."
+                
+                if (params.RELEASE_TO_NEXUSREPO) {
+                    sh "docker tag ${env.COMPONENT_NAME}:${env.APP_VER} 10.87.1.60:8083/${env.COMPONENT_NAME}:${env.APP_VER}"
+                    sh "docker push 10.87.1.60:8083/${env.COMPONENT_NAME}:${env.APP_VER}"
+                }
             }
         }
 
-        stage("WebInpsect Scan - DAST") {
+        stage("Deployment using Octopus Deploy") {
+            steps {
+                pwsh 'Write-Output "The step for Octopus Deployment goes here..."'
+            }
+        }
+
+        stage("Fortify WebInpsect - DAST") {
             steps {
                 // Execute PowerShell script for WebInspect REST API scanning
                 pwsh returnStatus: true, script: './powershell/webinspect_automation.ps1'
             }
         }
     }    
-}
-
-def checkScanStatus() {
-    def matcher1 = manager.getLogMatcher('^The job state is:  (.*)$')
-    def matcher2 = manager.getLogMatcher('^SSC upload state is:  (.*)$')
-
-    println "The job status is: ${matcher1}"
-    println "SSC upload state is: ${matcher2}"
-
-    if (!matcher1.matches() && !matcher2.matches()) {
-        //  Check scanning status until it's completed
-        pwsh '/home/fortify/bin/scancentral -url http://10.87.1.12:8090/scancentral-ctrl status -token (Get-Content "./scantoken.txt")'
-
-        checkScanStatus()
-    }
 }
