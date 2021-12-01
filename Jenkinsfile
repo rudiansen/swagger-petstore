@@ -24,9 +24,6 @@ pipeline {
         GIT_URL = scm.getUserRemoteConfigs()[0].getUrl()
         JAVA_VERSION = 8
 
-        // Credential references        
-        //SSC_AUTH_TOKEN = credentials('iwa-ssc-ci-token-id')    
-
         // The following are defaulted and can be overriden by creating a "Build parameter" of the same name
         SSC_URL = "${params.SSC_URL ?: 'http://10.87.1.12:8080/ssc'}" // URL of Fortify Software Security Center
         SSC_APP_VERSION_ID = "${params.SSC_APP_VERSION_ID ?: '1001'}" // Id of Application in SSC to upload results to        
@@ -73,9 +70,6 @@ pipeline {
         stage('Fortify ScanCentral - SAST') {           
             steps {
                 script {
-                    // Get code from Git repository so we can recompile it                    
-                    // git branch: 'poc-sss', url: 'https://github.com/rudiansen/swagger-petstore'
-
                     // Run Maven debug compile, download dependencies (if required) and package up for ScanCentral
                     if (isUnix()) {
                         sh "mvn -Dmaven.compiler.debuglevel=lines,vars,source -DskipTests -P fortify clean verify"
@@ -122,19 +116,19 @@ pipeline {
                             scanToken = matcher.group(1)
                         
                             if (scanToken != null) {
-                                println "Received scan token: ${scanToken}"
-                                // Write scan token to a file
-                                // echo "${scanToken} > ./scantoken.txt"
+                                println "Received scan token: ${scanToken}"                               
                             }
                         }
                     }                                                           
                 }
                 
+                // Write scan token to a file
                 writeFile(file: 'scantoken.txt', text: "${scanToken}")
 
-                // Print list of files in current working directory
+                // Print list of files to check whether the scantoken.txt file exists
                 sh 'ls -al ./'
 
+                // Read scan token from the new created file
                 sh 'cat ./scantoken.txt'
 
                 //  Check scanning status until it's completed                
@@ -144,13 +138,26 @@ pipeline {
 
         stage("Build Docker image and push to Nexus Repo") {
             steps {
+
+                docker.withRegistry('http://10.87.1.60:8083', 'DockerCredentialsNexusRepos') {
+
+                    def customImage = docker.build("10.87.1.60:8083/${env.COMPONENT_NAME}:${env.APP_VER}-${env.BUILD_ID}")
+            
+                    /* Push the container to the custom Registry */
+                    customImage.push()
+                }
+
                 // Build Docker image
-                sh "docker build -t ${env.COMPONENT_NAME}:${env.APP_VER} ."
+                // sh "docker build -t ${env.COMPONENT_NAME}:${env.APP_VER} ."
                 
-                //if (params.RELEASE_TO_NEXUSREPO) {
-                    sh "docker tag ${env.COMPONENT_NAME}:${env.APP_VER} 10.87.1.60:8083/${env.COMPONENT_NAME}:${env.APP_VER}"
-                    sh "docker push 10.87.1.60:8083/${env.COMPONENT_NAME}:${env.APP_VER}"
-                //}
+                // //if (params.RELEASE_TO_NEXUSREPO) {
+                //     sh "docker tag ${env.COMPONENT_NAME}:${env.APP_VER} 10.87.1.60:8083/${env.COMPONENT_NAME}:${env.APP_VER}"
+                    
+                //     withCredentials([usernamePassword(credentialsId: 'DockerCredentialsNexusRepos', usernameVariable: 'NexusUsername', passwordVariable: 'NexusPassword')]) {
+                //     sh "docker login 10.87.1.60:8083 -u ${NexusUsername} -p ${NexusPassword}"
+                    
+                //     sh "docker push 10.87.1.60:8083/${env.COMPONENT_NAME}:${env.APP_VER}"
+                // //}
             }
         }
 
