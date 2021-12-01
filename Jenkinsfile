@@ -52,11 +52,11 @@ pipeline {
                     println "Git commit id: ${env.GIT_COMMIT_ID}"                    
 
                     // Run maven to build WAR/JAR application
-                    if (isUnix()) {
-                        sh 'mvn "-Dskip.unit.tests=false" -Dtest="*Test,!PasswordConstraintValidatorTest,!UserServiceTest,!DefaultControllerTest,!SeleniumFlowIT" -DfailIfNoTests=false -B clean verify package --file pom.xml'
-                    } else {
-                        bat "mvn \"-Dskip.unit.tests=false\" Dtest=\"*Test,!PasswordConstraintValidatorTest,!UserServiceTest,!DefaultControllerTest,!SeleniumFlowIT\" -DfailIfNoTests=false -B clean verify package --file pom.xml"
-                    }
+                    // if (isUnix()) {
+                    //     sh 'mvn "-Dskip.unit.tests=false" -Dtest="*Test,!PasswordConstraintValidatorTest,!UserServiceTest,!DefaultControllerTest,!SeleniumFlowIT" -DfailIfNoTests=false -B clean verify package --file pom.xml'
+                    // } else {
+                    //     bat "mvn \"-Dskip.unit.tests=false\" Dtest=\"*Test,!PasswordConstraintValidatorTest,!UserServiceTest,!DefaultControllerTest,!SeleniumFlowIT\" -DfailIfNoTests=false -B clean verify package --file pom.xml"
+                    // }
                 }
             }
 
@@ -74,7 +74,7 @@ pipeline {
             steps {
                 script {
                     // Get code from Git repository so we can recompile it                    
-                    git branch: 'poc-sss', url: 'https://github.com/rudiansen/swagger-petstore'
+                    // git branch: 'poc-sss', url: 'https://github.com/rudiansen/swagger-petstore'
 
                     // Run Maven debug compile, download dependencies (if required) and package up for ScanCentral
                     if (isUnix()) {
@@ -161,6 +161,9 @@ pipeline {
 def checkScanStatus() {
     def matcher1 = manager.getLogMatcher('^The job state is:  (.*)$')
     def matcher2 = manager.getLogMatcher('^SSC upload state is:  (.*)$')
+
+    println "The job status is: ${matcher1}"
+    println "SSC upload state is: ${matcher2}"
 
     if (!matcher1.matches() && !matcher2.matches()) {
         //  Check scanning status until it's completed
