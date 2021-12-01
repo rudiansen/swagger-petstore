@@ -74,7 +74,7 @@ pipeline {
             steps {
 
                 sh 'rm -rf ./scantoken.txt'
-                
+
                 script {
                     // Get code from Git repository so we can recompile it                    
                     // git branch: 'poc-sss', url: 'https://github.com/rudiansen/swagger-petstore'
@@ -117,18 +117,20 @@ pipeline {
                         println "No Static Application Security Testing (SAST) to do."
                     }                   
 
-                    // Populate scanCentral token for retrieving scan status                    
-                    def matcher = manager.getLogMatcher('^.*received token:  (.*)$')
+                    script {
+                        // Populate scanCentral token for retrieving scan status                    
+                        def matcher = manager.getLogMatcher('^.*received token:  (.*)$')
 
-                    if (matcher.matches()) {
-                        scanToken = matcher.group(1)
-                    
-                        if (scanToken != null) {
-                            println "Received scan token: ${scanToken}"
-                            // Write scan token to a file
-                            echo '"${scanToken}" > ./scantoken.txt'                                                            
+                        if (matcher.matches()) {
+                            scanToken = matcher.group(1)
+                        
+                            if (scanToken != null) {
+                                println "Received scan token: ${scanToken}"
+                                // Write scan token to a file
+                                echo '"${scanToken}" > ./scantoken.txt'                                                            
+                            }
                         }
-                    }                                       
+                    }                                                           
                 }
                 
                 // Print list of files in current working directory
