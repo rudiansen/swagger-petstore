@@ -1,5 +1,7 @@
 #!/usr/bin/env groovy
 
+def scanToken
+
 pipeline {
     agent any
 
@@ -112,7 +114,7 @@ pipeline {
                         println "No Static Application Security Testing (SAST) to do."
                     }
 
-                    // Check for ScanCentral scanning status until it's completed
+                    // Populate scanCentral token for retrieving scan status
                     script {
                         def matcher = manager.getLogMatcher('^.*received token:  (.*)$')
 
@@ -121,10 +123,13 @@ pipeline {
                         
                             if (scanToken != null) {
                                 println "Received scan token: ${scanToken}"
-                                
+                                echo "${scanToken} >> scantoken.txt"                                
                             }
                         }
                     }
+
+                    //  Check scanning status until it's completed
+                    pwsh '$FORTIFY_HOME/bin/scancentral -url http://10.87.1.12:8090/scancentral-ctrl status -token (Get-Content "./ssctoken.txt")'
                 }                        
             }
         }
