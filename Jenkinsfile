@@ -129,7 +129,7 @@ pipeline {
                     }
 
                     //  Check scanning status until it's completed
-                    pwsh '$FORTIFY_HOME/bin/scancentral -url http://10.87.1.12:8090/scancentral-ctrl status -token (Get-Content "./ssctoken.txt")'
+                    pwsh '/home/fortify/bin/scancentral -url http://10.87.1.12:8090/scancentral-ctrl status -token (Get-Content "./ssctoken.txt")'
                 }                        
             }
         }
