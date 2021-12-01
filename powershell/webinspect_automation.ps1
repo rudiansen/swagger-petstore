@@ -1,7 +1,7 @@
 #Written for Powershell 7
 #Variables
 $wiAPIurl = '10.87.1.95:8083'
-$sscURL = 'http://10.87.1.12:8080/ssc'
+$sscURL = 'http://10.87.1.12:8080/ssc/'
 $applicationVersionID = '10028'
 $sscToken = 'NjMyMDBhZjUtYWNjZC00MmUwLThiZGUtYWI1ZDg3YmFlMDM2'
 
