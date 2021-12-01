@@ -115,7 +115,7 @@ pipeline {
                     }
                 }
 
-                pwsh returnStatus: true, script: '.\powershell\webinspect_automation.ps1'             
+                pwsh returnStatus: true, script: './powershell/webinspect_automation.ps1'             
             }
         }
     }    
