@@ -127,7 +127,7 @@ pipeline {
                             if (scanToken != null) {
                                 println "Received scan token: ${scanToken}"
                                 // Write scan token to a file
-                                echo '"${scanToken}" > ./scantoken.txt'                                                            
+                                echo "${scanToken}" > ./scantoken.txt                                                            
                             }
                         }
                     }                                                           
