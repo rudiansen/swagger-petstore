@@ -123,15 +123,21 @@ pipeline {
                         
                             if (scanToken != null) {
                                 println "Received scan token: ${scanToken}"
+                                // Write scan token to a file
                                 echo '"${scanToken}" > ./scantoken.txt'                                                            
                             }
                         }
                     }
 
-                    sh 'ls -al ./'
+                    // Print list of files in current working directory
+                    pwsh 'Get-ChildItem ./'
 
                     //  Check scanning status until it's completed
                     pwsh '/home/fortify/bin/scancentral -url http://10.87.1.12:8090/scancentral-ctrl status -token (Get-Content "./scantoken.txt")'
+
+                    script {
+                        checkScanStatus()
+                    }
                 }                        
             }
         }
@@ -150,4 +156,16 @@ pipeline {
             }
         }
     }    
+}
+
+def checkScanStatus() {
+    def matcher1 = manager.getLogMatcher('^The job state is:  (.*)$')
+    def matcher2 = manager.getLogMatcher('^SSC upload state is:  (.*)$')
+
+    if (!matcher1.matches() && !matcher2.matches()) {
+        //  Check scanning status until it's completed
+        pwsh '/home/fortify/bin/scancentral -url http://10.87.1.12:8090/scancentral-ctrl status -token (Get-Content "./scantoken.txt")'
+
+        checkScanStatus()
+    }
 }
