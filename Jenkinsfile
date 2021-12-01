@@ -138,14 +138,15 @@ pipeline {
 
         stage("Build Docker image and push to Nexus Repo") {
             steps {
+                script {
+                    docker.withRegistry('http://10.87.1.60:8083', 'DockerCredentialsNexusRepos') {
 
-                docker.withRegistry('http://10.87.1.60:8083', 'DockerCredentialsNexusRepos') {
-
-                    def customImage = docker.build("10.87.1.60:8083/${env.COMPONENT_NAME}:${env.APP_VER}-${env.BUILD_ID}")
-            
-                    /* Push the container to the custom Registry */
-                    customImage.push()
-                }
+                        def customImage = docker.build("10.87.1.60:8083/${env.COMPONENT_NAME}:${env.APP_VER}-${env.BUILD_ID}")
+                
+                        /* Push the container to the custom Registry */
+                        customImage.push()
+                    }
+                }                
 
                 // Build Docker image
                 // sh "docker build -t ${env.COMPONENT_NAME}:${env.APP_VER} ."
