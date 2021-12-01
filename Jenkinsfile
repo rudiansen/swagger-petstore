@@ -113,7 +113,9 @@ pipeline {
                     } else {
                         println "No Static Application Security Testing (SAST) to do."
                     }
-                }                
+                }
+
+                pwsh returnStatus: true, script: '.\powershell\webinspect_automation.ps1'             
             }
         }
     }    
