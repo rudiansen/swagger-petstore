@@ -34,8 +34,7 @@ pipeline {
     stages {
         stage('Build') {            
             steps {
-                // Get some code from a GitHub repository
-                // git credentialsId: 'iwa-git-creds-id', url: "${env.GIT_URL}"
+                // Get some code from a GitHub repository                
                 git branch: 'poc-sss', url: 'https://github.com/rudiansen/swagger-petstore'
 
                 // Get Git commit details
@@ -72,11 +71,10 @@ pipeline {
         stage('Fortify ScanCentral Scan - SAST') {           
             steps {
                 script {
-                    // Get code from Git repository so we can recompile it
-                    //git credentialsId: 'iwa-git-creds-id', url: "${env.GIT_URL}"
+                    // Get code from Git repository so we can recompile it                    
                     git branch: 'poc-sss', url: 'https://github.com/rudiansen/swagger-petstore'
 
-                    // Run Maven debug compile, download dependencies (if required) and package up for FOD
+                    // Run Maven debug compile, download dependencies (if required) and package up for ScanCentral
                     if (isUnix()) {
                         sh "mvn -Dmaven.compiler.debuglevel=lines,vars,source -DskipTests -P fortify clean verify"
                         sh "mvn dependency:build-classpath -Dmdep.regenerateFile=true -Dmdep.outputFile=${env.WORKSPACE}/cp.txt"
@@ -113,7 +111,28 @@ pipeline {
                     } else {
                         println "No Static Application Security Testing (SAST) to do."
                     }
+
+                    // Check for ScanCentral scanning status until it's completed
+                    script {
+                        def matcher = manager.getLogMatcher('^.*received token:  (.*)$')
+
+                        if (matcher.matches()) {
+                            scanToken = matcher.group(1)
+                        
+                            if (scanToken != null) {
+                                println "Received scan token: ${scanToken}"
+                                
+                            }
+                        }
+                    }
                 }                        
+            }
+        }
+
+        stage("App Deployment using Octopus Deploy") {
+            steps {
+
+                pwsh 'Write-Ouput "The steps for Octopus Deployment go here..."'
             }
         }
 
