@@ -132,7 +132,7 @@ pipeline {
         stage("App Deployment using Octopus Deploy") {
             steps {
 
-                pwsh 'Write-Ouput "The steps for Octopus Deployment go here..."'
+                pwsh 'Write-Output "The steps for Octopus Deployment go here..."'
             }
         }
 
