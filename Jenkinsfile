@@ -72,6 +72,9 @@ pipeline {
 
         stage('Fortify ScanCentral Scan - SAST') {           
             steps {
+
+                sh 'rm -rf ./scantoken.txt'
+                
                 script {
                     // Get code from Git repository so we can recompile it                    
                     // git branch: 'poc-sss', url: 'https://github.com/rudiansen/swagger-petstore'
@@ -112,38 +115,33 @@ pipeline {
                         }                    
                     } else {
                         println "No Static Application Security Testing (SAST) to do."
-                    }
+                    }                   
 
-                    // Delete scantoken.txt file
-                    sh 'rm ./scantoken.txt'
+                    // Populate scanCentral token for retrieving scan status                    
+                    def matcher = manager.getLogMatcher('^.*received token:  (.*)$')
+
+                    if (matcher.matches()) {
+                        scanToken = matcher.group(1)
                     
-                    // Populate scanCentral token for retrieving scan status
-                    script {
-                        def matcher = manager.getLogMatcher('^.*received token:  (.*)$')
-
-                        if (matcher.matches()) {
-                            scanToken = matcher.group(1)
-                        
-                            if (scanToken != null) {
-                                println "Received scan token: ${scanToken}"
-                                // Write scan token to a file
-                                echo '"${scanToken}" > ./scantoken.txt'                                                            
-                            }
+                        if (scanToken != null) {
+                            println "Received scan token: ${scanToken}"
+                            // Write scan token to a file
+                            echo '"${scanToken}" > ./scantoken.txt'                                                            
                         }
-                    }
+                    }                                       
+                }
+                
+                // Print list of files in current working directory
+                pwsh 'Get-ChildItem ./'
 
-                    // Print list of files in current working directory
-                    pwsh 'Get-ChildItem ./'
+                pwsh 'Get-Content "./scantoken.txt"'
 
-                    pwsh 'Get-Content "./scantoken.txt"'
-
-                    //  Check scanning status until it's completed
-                    pwsh '/home/fortify/bin/scancentral -url http://10.87.1.12:8090/scancentral-ctrl status -token (Get-Content "./scantoken.txt")'
-
-                    script {
-                        checkScanStatus()
-                    }
-                }                        
+                //  Check scanning status until it's completed
+                pwsh '/home/fortify/bin/scancentral -url http://10.87.1.12:8090/scancentral-ctrl status -token (Get-Content "./scantoken.txt")'
+                
+                script {
+                    checkScanStatus()
+                }                                      
             }
         }
 
