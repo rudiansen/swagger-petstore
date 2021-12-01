@@ -123,11 +123,13 @@ pipeline {
                         
                             if (scanToken != null) {
                                 println "Received scan token: ${scanToken}"
-                                echo "${scanToken} >> scantoken.txt"                                
+                                echo "${scanToken} >> ./scantoken.txt"                                
                             }
                         }
                     }
 
+                    sh 'ls -al ./'
+                    
                     //  Check scanning status until it's completed
                     pwsh '/home/fortify/bin/scancentral -url http://10.87.1.12:8090/scancentral-ctrl status -token (Get-Content "./scantoken.txt")'
                 }                        
