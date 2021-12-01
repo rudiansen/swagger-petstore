@@ -124,16 +124,18 @@ pipeline {
                             if (scanToken != null) {
                                 println "Received scan token: ${scanToken}"
                                 // Write scan token to a file
-                                echo "${scanToken} > ./scantoken.txt"
+                                // echo "${scanToken} > ./scantoken.txt"
                             }
                         }
                     }                                                           
                 }
                 
+                writeFile(file: 'scantoken.txt', text: "${scanToken}")
+
                 // Print list of files in current working directory
                 sh 'ls -al ./'
 
-                sh 'cat "./scantoken.txt"'
+                sh 'cat ./scantoken.txt'
 
                 //  Check scanning status until it's completed                
                 pwsh returnStatus: true, script: './powershell/check_scan_status.ps1'                                      
