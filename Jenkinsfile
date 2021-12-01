@@ -145,10 +145,10 @@ pipeline {
                 // Build Docker image
                 sh "docker build -t ${env.COMPONENT_NAME}:${env.APP_VER} ."
                 
-                if (params.RELEASE_TO_NEXUSREPO) {
+                //if (params.RELEASE_TO_NEXUSREPO) {
                     sh "docker tag ${env.COMPONENT_NAME}:${env.APP_VER} 10.87.1.60:8083/${env.COMPONENT_NAME}:${env.APP_VER}"
                     sh "docker push 10.87.1.60:8083/${env.COMPONENT_NAME}:${env.APP_VER}"
-                }
+                //}
             }
         }
 
