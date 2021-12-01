@@ -28,6 +28,6 @@ while ($isRunning){
 	if ($jobState -eq $completedStatus -and $uploadState -eq $completedStatus) {
 		$isRunning = $False
 	} else {
-		Start-Sleep -Seconds 5
+		Start-Sleep -Seconds 20
 	}
 }
