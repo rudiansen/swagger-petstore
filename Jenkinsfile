@@ -138,18 +138,15 @@ pipeline {
 
         stage("Build Docker image and push to Nexus Repo") {
             steps {
-                node {
-                    // Get some code from a GitHub repository                
-                    git branch: 'poc-sss', url: 'https://github.com/rudiansen/swagger-petstore'
-
-                    docker.withRegistry('http://10.87.1.60:8083', 'DockerCredentialsNexusRepos') {
-
+                
+                withDockerServer([uri: 'tcp://10.87.1.236:2375']) {
+                    withDockerRegistry(credentialsId: 'DockerCredentialsNexusRepos', url: 'http://10.87.1.60:8083') {
                         def customImage = docker.build("10.87.1.60:8083/${env.COMPONENT_NAME}:${env.APP_VER}-${env.BUILD_ID}")
                 
                         /* Push the container to the custom Registry */
                         customImage.push()
                     }
-                }                
+                }                           
 
                 // Build Docker image
                 // sh "docker build -t ${env.COMPONENT_NAME}:${env.APP_VER} ."
