@@ -114,6 +114,9 @@ pipeline {
                         println "No Static Application Security Testing (SAST) to do."
                     }
 
+                    // Delete scantoken.txt file
+                    sh 'rm ./scantoken.txt'
+                    
                     // Populate scanCentral token for retrieving scan status
                     script {
                         def matcher = manager.getLogMatcher('^.*received token:  (.*)$')
