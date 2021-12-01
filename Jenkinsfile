@@ -69,7 +69,7 @@ pipeline {
             }
         }
 
-        stage('SAST') {           
+        stage('Fortify ScanCentral Scan - SAST') {           
             steps {
                 script {
                     // Get code from Git repository so we can recompile it
@@ -113,9 +113,14 @@ pipeline {
                     } else {
                         println "No Static Application Security Testing (SAST) to do."
                     }
-                }
+                }                        
+            }
+        }
 
-                pwsh returnStatus: true, script: './powershell/webinspect_automation.ps1'             
+        stage("WebInpsect Scan - DAST") {
+            steps {
+                // Execute PowerShell script for WebInspect REST API scanning
+                pwsh returnStatus: true, script: './powershell/webinspect_automation.ps1'
             }
         }
     }    
