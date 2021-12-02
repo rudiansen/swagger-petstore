@@ -30,8 +30,8 @@ pipeline {
         SSC_APP_VERSION_ID = "${params.SSC_APP_VERSION_ID ?: '1001'}" // Id of Application in SSC to upload results to        
         SSC_SENSOR_POOL_UUID = "${params.SSC_SENSOR_POOL_UUID ?: '00000000-0000-0000-0000-000000000002'}" // UUID of Scan Central Sensor Pool to use - leave for Default Pool        
 
-	registry = "10.87.1.60:8083/swagger-petStore"
-	registryCredential = 'DockerCredentialsNexusRepos'
+		registry = "10.87.1.60:8083/swagger-petStore"
+		registryCredential = 'DockerCredentialsNexusRepos'
         dockerImage = ''
     }
 
@@ -142,23 +142,29 @@ pipeline {
         }
 
 		stage('Building image') {
-		  steps{
-			script {
-			  dockerImage = docker.build registry + ":$BUILD_NUMBER"
-			  sh 'docker Create/build image'
+			docker.withTool("default") { 
+				withDockerServer([uri: "tcp://10.87.1.236:2375"]) { 
+					dockerImage = docker.build registry + ":$BUILD_NUMBER"
+				} 
 			}
-		  }
 		}
 		stage('Deploy Image') {
-		  steps{
+			docker.withTool("default") { 
+				withDockerServer([uri: "tcp://10.87.1.236:2375"]) {
+					withDockerRegistry(credentialsId: 'registryCredential', url: "http://10.87.1.60:8083") {
+						dockerImage.push()
+						dockerImage.push("latest")
+					}
+				} 
+			}
+		  /* steps{
 			script {
 			  docker.withRegistry( '', registryCredential ) {
 				dockerImage.push()
 				dockerImage.push("latest")
-				sh 'docker Push image'
 			  }
 			}
-		  }
+		  } */
 		}
 
         stage("Build Docker image and push to Nexus Repo") {            
