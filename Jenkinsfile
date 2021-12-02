@@ -142,24 +142,28 @@ pipeline {
         }
 
 		stage('Building image') {
-		  steps{
-			script {
-				docker.withServer('tcp://10.87.1.236:2375', 'registryCredential') {
-					dockerImage = docker.build registry + ":$BUILD_NUMBER"
-				}
-			}
+		  agent any
+		  steps {
+			sh 'docker build -t registry + ":$BUILD_NUMBER'
 		  }
+		  // steps{
+			//script {
+				//docker.withServer('tcp://10.87.1.236:2375', 'registryCredential') {
+					//dockerImage = docker.build registry + ":$BUILD_NUMBER"
+				//}
+			//}
+		  //}
 		}
-		stage('Deploy Image') {
-		  steps{
-			script {
-			  docker.withRegistry( 'tcp://10.87.1.236:2375', registryCredential ) {
-				dockerImage.push()
-				dockerImage.push("latest")
-			  }
-			}
-		  }
-		}
+		//stage('Deploy Image') {
+		//  steps{
+		//	script {
+		//	  docker.withRegistry( 'tcp://10.87.1.236:2375', registryCredential ) {
+		//		dockerImage.push()
+		//		dockerImage.push("latest")
+		//	  }
+		//	}
+		 // }
+		//}
 
         stage("Build Docker image and push to Nexus Repo") {            
             steps {
