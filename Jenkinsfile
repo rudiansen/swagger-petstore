@@ -143,22 +143,26 @@ pipeline {
 
 		stage('Building image') {
 			steps {
-				docker.withTool("default") { 
-					withDockerServer([uri: "tcp://10.87.1.236:2375"]) { 
-						dockerImage = docker.build registry + ":$BUILD_NUMBER"
-					} 
+				script {
+					docker.withTool("default") { 
+						withDockerServer([uri: "tcp://10.87.1.236:2375"]) { 
+							dockerImage = docker.build registry + ":$BUILD_NUMBER"
+						} 
+					}
 				}
 			}
 		}
 		stage('Deploy Image') {
 			steps {
-				docker.withTool("default") { 
-					withDockerServer([uri: "tcp://10.87.1.236:2375"]) {
-						withDockerRegistry(credentialsId: 'registryCredential', url: "http://10.87.1.60:8083") {
-							dockerImage.push()
-							dockerImage.push("latest")
-						}
-					} 
+				script {
+					docker.withTool("default") { 
+						withDockerServer([uri: "tcp://10.87.1.236:2375"]) {
+							withDockerRegistry(credentialsId: 'registryCredential', url: "http://10.87.1.60:8083") {
+								dockerImage.push()
+								dockerImage.push("latest")
+							}
+						} 
+					}
 				}
 			}
 		  /* steps{
