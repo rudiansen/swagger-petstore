@@ -23,10 +23,7 @@ pipeline {
         COMPONENT_NAME = "swagger-petstore"
         GIT_URL = scm.getUserRemoteConfigs()[0].getUrl()
         JAVA_VERSION = 8
-        NEXUS_REPOSITORY_URL = 'http://10.87.1.60:8083'
-
-        // Credentials
-        NEXUS_REPOSITORY_CREDS = credentials('DockerCredentialsNexusRepos')
+        NEXUS_REPOSITORY_URL = 'http://10.87.1.60:8083'        
 
         // The following are defaulted and can be overriden by creating a "Build parameter" of the same name
         SSC_URL = "${params.SSC_URL ?: 'http://10.87.1.12:8080/ssc'}" // URL of Fortify Software Security Center
@@ -41,24 +38,24 @@ pipeline {
                 git branch: 'poc-sss', url: 'https://github.com/rudiansen/swagger-petstore'
 
                 // Get Git commit details
-                script {
-                    if (isUnix()) {
-                        sh 'git rev-parse HEAD > .git/commit-id'
-                    } else {
-                        bat(/git rev-parse HEAD > .git\\commit-id/)
-                    }
+                // script {
+                //     if (isUnix()) {
+                //         sh 'git rev-parse HEAD > .git/commit-id'
+                //     } else {
+                //         bat(/git rev-parse HEAD > .git\\commit-id/)
+                //     }
                     
-                    env.GIT_COMMIT_ID = readFile('.git/commit-id').trim()                    
+                //     env.GIT_COMMIT_ID = readFile('.git/commit-id').trim()                    
 
-                    println "Git commit id: ${env.GIT_COMMIT_ID}"                    
+                //     println "Git commit id: ${env.GIT_COMMIT_ID}"                    
 
-                    // Run maven to build WAR/JAR application
-                    if (isUnix()) {
-                        sh 'mvn "-Dskip.unit.tests=false" -Dtest="*Test,!PasswordConstraintValidatorTest,!UserServiceTest,!DefaultControllerTest,!SeleniumFlowIT" -DfailIfNoTests=false -B clean verify package --file pom.xml'
-                    } else {
-                        bat "mvn \"-Dskip.unit.tests=false\" Dtest=\"*Test,!PasswordConstraintValidatorTest,!UserServiceTest,!DefaultControllerTest,!SeleniumFlowIT\" -DfailIfNoTests=false -B clean verify package --file pom.xml"
-                    }
-                }
+                //     // Run maven to build WAR/JAR application
+                //     if (isUnix()) {
+                //         sh 'mvn "-Dskip.unit.tests=false" -Dtest="*Test,!PasswordConstraintValidatorTest,!UserServiceTest,!DefaultControllerTest,!SeleniumFlowIT" -DfailIfNoTests=false -B clean verify package --file pom.xml'
+                //     } else {
+                //         bat "mvn \"-Dskip.unit.tests=false\" Dtest=\"*Test,!PasswordConstraintValidatorTest,!UserServiceTest,!DefaultControllerTest,!SeleniumFlowIT\" -DfailIfNoTests=false -B clean verify package --file pom.xml"
+                //     }
+                // }
             }
 
             post {
@@ -136,7 +133,7 @@ pipeline {
                 sh 'cat ./scantoken.txt'
 
                 //  Check scanning status until it's completed                
-                pwsh label: 'Check ScanCentral scan status', returnStatus: true, returnStdout: true, script: './powershell/check_scan_status.ps1'                                      
+                pwsh label: 'Check ScanCentral scan status', returnStatus: true, script: './powershell/check_scan_status.ps1'                                      
             }
         }
 
@@ -144,7 +141,7 @@ pipeline {
             agent { 
                 dockerfile {
                     registryUrl 'http://10.87.1.60:8083/'
-                    registryCredentialsId "${env.NEXUS_REPOSITORY_CREDS}"
+                    registryCredentialsId 'DockerCredentialsNexusRepos'
                 }
             }
             steps {
@@ -193,7 +190,7 @@ pipeline {
         stage("Fortify WebInpsect - DAST") {
             steps {
                 // Execute PowerShell script for WebInspect REST API scanning
-                pwsh label: 'DAST with Fortify WebInspect', returnStatus: true, returnStdout: true, script: './powershell/webinspect_automation.ps1'
+                pwsh label: 'DAST with Fortify WebInspect', returnStatus: true, script: './powershell/webinspect_automation.ps1'
             }
         }
     }    
