@@ -23,6 +23,10 @@ pipeline {
         COMPONENT_NAME = "swagger-petstore"
         GIT_URL = scm.getUserRemoteConfigs()[0].getUrl()
         JAVA_VERSION = 8
+        NEXUS_REPOSITORY_URL = 'http://10.87.1.60:8083'
+
+        // Credentials
+        NEXUS_REPOSITORY_CREDS = credentials('DockerCredentialsNexusRepos')
 
         // The following are defaulted and can be overriden by creating a "Build parameter" of the same name
         SSC_URL = "${params.SSC_URL ?: 'http://10.87.1.12:8080/ssc'}" // URL of Fortify Software Security Center
@@ -132,13 +136,30 @@ pipeline {
                 sh 'cat ./scantoken.txt'
 
                 //  Check scanning status until it's completed                
-                pwsh returnStatus: true, script: './powershell/check_scan_status.ps1'                                      
+                pwsh label: 'Check ScanCentral scan status', returnStatus: true, resturnStdout: true, script: './powershell/check_scan_status.ps1'                                      
             }
         }
 
         stage("Build Docker image and push to Nexus Repo") {
+            agent { 
+                dockerfile {
+                    registryUrl 'http://10.87.1.60:8083/'
+                    registryCredentialsId "${env.NEXUS_REPOSITORY_CREDS}"
+                }
+            }
             steps {
-                pwsh 'Write-Output "Docker build step and upload to Nexus Repos go here..."'
+                // Get some code from a GitHub repository                
+                git branch: 'poc-sss', url: 'https://github.com/rudiansen/swagger-petstore'
+
+                script {
+                    def customImage = docker.build("10.87.1.60:8083/${env.COMPONENT_NAME}:${env.APP_VER}-${env.BUILD_ID}")
+                    /* Push the container to the custom Registry */
+                    customImage.push()
+
+                    customImage.push('latest')
+                }
+
+                // pwsh 'Write-Output "Docker build step and upload to Nexus Repos go here..."'
 
                 // withDockerServer([uri: 'tcp://10.87.1.236:2375']) {
                 //     withDockerRegistry(credentialsId: 'DockerCredentialsNexusRepos', url: 'http://10.87.1.60:8083') {
@@ -172,7 +193,7 @@ pipeline {
         stage("Fortify WebInpsect - DAST") {
             steps {
                 // Execute PowerShell script for WebInspect REST API scanning
-                pwsh returnStatus: true, script: './powershell/webinspect_automation.ps1'
+                pwsh label: 'DAST with Fortify WebInspect', returnStatus: true, returnStdout: true, script: './powershell/webinspect_automation.ps1'
             }
         }
     }    
