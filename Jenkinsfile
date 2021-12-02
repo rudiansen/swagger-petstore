@@ -149,11 +149,13 @@ pipeline {
                 git branch: 'poc-sss', url: 'https://github.com/rudiansen/swagger-petstore'
 
                 script {
-                    def customImage = docker.build("10.87.1.60:8083/${env.COMPONENT_NAME}:${env.APP_VER}-${env.BUILD_ID}")
-                    /* Push the container to the custom Registry */
-                    customImage.push()
+                    withDockerServer([uri: 'tcp://10.87.1.236:2375']) {
+                        def customImage = docker.build("10.87.1.60:8083/${env.COMPONENT_NAME}:${env.APP_VER}-${env.BUILD_ID}")
+                        /* Push the container to the custom Registry */
+                        customImage.push()
 
-                    customImage.push('latest')
+                        customImage.push('latest')
+                    }                    
                 }
 
                 // pwsh 'Write-Output "Docker build step and upload to Nexus Repos go here..."'
