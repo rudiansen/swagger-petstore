@@ -136,7 +136,7 @@ pipeline {
                 sh 'cat ./scantoken.txt'
 
                 //  Check scanning status until it's completed                
-                pwsh label: 'Check ScanCentral scan status', returnStatus: true, resturnStdout: true, script: './powershell/check_scan_status.ps1'                                      
+                pwsh label: 'Check ScanCentral scan status', returnStatus: true, returnStdout: true, script: './powershell/check_scan_status.ps1'                                      
             }
         }
 
