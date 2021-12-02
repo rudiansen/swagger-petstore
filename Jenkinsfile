@@ -21,7 +21,7 @@ pipeline {
         APP_NAME = "Swagger-PetStore"
         APP_VER = "1.0.7"     
         COMPONENT_NAME = "swagger-petstore"
-        GIT_URL = scm.getUserRemoteConfigs()[0].getUrl()
+        GIT_URL = "https://github.com/rudiansen/swagger-petstore"
         JAVA_VERSION = 8
         NEXUS_REPOSITORY_URL = 'http://10.87.1.60:8083'        
 
@@ -35,27 +35,27 @@ pipeline {
         stage('Build') {            
             steps {
                 // Get some code from a GitHub repository                
-                git branch: 'poc-sss', url: 'https://github.com/rudiansen/swagger-petstore'
+                git branch: 'poc-sss', url: "${env.GIT_URL}"
 
                 // Get Git commit details
-                // script {
-                //     if (isUnix()) {
-                //         sh 'git rev-parse HEAD > .git/commit-id'
-                //     } else {
-                //         bat(/git rev-parse HEAD > .git\\commit-id/)
-                //     }
+                script {
+                    if (isUnix()) {
+                        sh 'git rev-parse HEAD > .git/commit-id'
+                    } else {
+                        bat(/git rev-parse HEAD > .git\\commit-id/)
+                    }
                     
-                //     env.GIT_COMMIT_ID = readFile('.git/commit-id').trim()                    
+                    env.GIT_COMMIT_ID = readFile('.git/commit-id').trim()                    
 
-                //     println "Git commit id: ${env.GIT_COMMIT_ID}"                    
+                    println "Git commit id: ${env.GIT_COMMIT_ID}"                    
 
-                //     // Run maven to build WAR/JAR application
-                //     if (isUnix()) {
-                //         sh 'mvn "-Dskip.unit.tests=false" -Dtest="*Test,!PasswordConstraintValidatorTest,!UserServiceTest,!DefaultControllerTest,!SeleniumFlowIT" -DfailIfNoTests=false -B clean verify package --file pom.xml'
-                //     } else {
-                //         bat "mvn \"-Dskip.unit.tests=false\" Dtest=\"*Test,!PasswordConstraintValidatorTest,!UserServiceTest,!DefaultControllerTest,!SeleniumFlowIT\" -DfailIfNoTests=false -B clean verify package --file pom.xml"
-                //     }
-                // }
+                    // Run maven to build WAR/JAR application
+                    if (isUnix()) {
+                        sh 'mvn "-Dskip.unit.tests=false" -Dtest="*Test,!PasswordConstraintValidatorTest,!UserServiceTest,!DefaultControllerTest,!SeleniumFlowIT" -DfailIfNoTests=false -B clean verify package --file pom.xml'
+                    } else {
+                        bat "mvn \"-Dskip.unit.tests=false\" Dtest=\"*Test,!PasswordConstraintValidatorTest,!UserServiceTest,!DefaultControllerTest,!SeleniumFlowIT\" -DfailIfNoTests=false -B clean verify package --file pom.xml"
+                    }
+                }
             }
 
             post {
@@ -137,49 +137,24 @@ pipeline {
             }
         }
 
-        stage("Build Docker image and push to Nexus Repo") {
-            agent { 
-                dockerfile {
-                    registryUrl 'http://10.87.1.60:8083/'
-                    registryCredentialsId 'DockerCredentialsNexusRepos'
-                }
-            }
+        stage("Build Docker image and push to Nexus Repo") {            
             steps {
                 // Get some code from a GitHub repository                
-                git branch: 'poc-sss', url: 'https://github.com/rudiansen/swagger-petstore'
-
+                git branch: 'poc-sss', url: "${env.GIT_URL}"
+                
                 script {
                     withDockerServer([uri: 'tcp://10.87.1.236:2375']) {
-                        def customImage = docker.build("10.87.1.60:8083/${env.COMPONENT_NAME}:${env.APP_VER}-${env.BUILD_ID}")
-                        /* Push the container to the custom Registry */
-                        customImage.push()
+                        withDockerRegistry(credentialsId: 'DockerCredentialsNexusRepos', url: "${env.NEXUS_REPOSITORY_URL}") {
+                            def customImage = docker.build("10.87.1.60:8083/${env.COMPONENT_NAME}:${env.APP_VER}-${env.BUILD_ID}")
+                            /* Push the container to the custom Registry */
+                            customImage.push()
 
-                        customImage.push('latest')
+                            customImage.push('latest')
+                        }                        
                     }                    
                 }
 
-                // pwsh 'Write-Output "Docker build step and upload to Nexus Repos go here..."'
-
-                // withDockerServer([uri: 'tcp://10.87.1.236:2375']) {
-                //     withDockerRegistry(credentialsId: 'DockerCredentialsNexusRepos', url: 'http://10.87.1.60:8083') {
-                //         def customImage = docker.build("10.87.1.60:8083/${env.COMPONENT_NAME}:${env.APP_VER}-${env.BUILD_ID}")
-                
-                //         /* Push the container to the custom Registry */
-                //         customImage.push()
-                //     }
-                // }                           
-
-                // Build Docker image
-                // sh "docker build -t ${env.COMPONENT_NAME}:${env.APP_VER} ."
-                
-                // //if (params.RELEASE_TO_NEXUSREPO) {
-                //     sh "docker tag ${env.COMPONENT_NAME}:${env.APP_VER} 10.87.1.60:8083/${env.COMPONENT_NAME}:${env.APP_VER}"
-                    
-                //     withCredentials([usernamePassword(credentialsId: 'DockerCredentialsNexusRepos', usernameVariable: 'NexusUsername', passwordVariable: 'NexusPassword')]) {
-                //     sh "docker login 10.87.1.60:8083 -u ${NexusUsername} -p ${NexusPassword}"
-                    
-                //     sh "docker push 10.87.1.60:8083/${env.COMPONENT_NAME}:${env.APP_VER}"
-                // //}
+                // pwsh 'Write-Output "Docker build step and upload to Nexus Repos go here..."'               
             }
         }
 
