@@ -1,7 +1,7 @@
 # Written for PowerShell 7
-param {
+param (
     [string]$APP_VERSION = 'latest'
-}
+)
 
 # Variables
 $dockerRemoteApiUrl = 'http://10.87.1.236:2375'
