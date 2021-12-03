@@ -5,9 +5,9 @@ $sscURL = 'http://10.87.1.12:8080/ssc/'
 $applicationVersionID = '10028'
 $sscToken = 'NjMyMDBhZjUtYWNjZC00MmUwLThiZGUtYWI1ZDg3YmFlMDM2'
 
-$scanURL = 'https://psi-outing-lucky-draw.azurewebsites.net/'
+$scanURL = 'http://10.87.1.236:30005/'
 $crawlAuditMode = 'CrawlandAudit'
-$scanName = 'psi-outing-lucky-draw'
+$scanName = 'swagger-petstore'
 
 #API Auth
 $pwd = ConvertTo-SecureString "P@ssw0rd" -AsPlainText -Force

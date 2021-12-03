@@ -5,21 +5,29 @@ def scanToken
 pipeline {
     agent any
 
-    parameters {        
+    parameters {
+        // Optional parameter whether to perform SAST using Fortify ScanCentral        
         booleanParam(name: 'SCANCENTRAL_SAST', 	defaultValue: params.SCANCENTRAL_SAST ?: false,
                 description: 'Run a remote scan using Scan Central SAST (SCA) for Static Application Security Testing')        
+        // Optional parameter whether to upload scan artifact to Fortify SSC
         booleanParam(name: 'UPLOAD_TO_SSC',		defaultValue: params.UPLOAD_TO_SSC ?: false,
-                description: 'Enable upload of scan results to Fortify Software Security Center')        
-        booleanParam(name: 'USE_DOCKER', defaultValue: params.USE_DOCKER ?: false,
-                description: 'Package the application into a Dockerfile for running/testing')
-        booleanParam(name: 'RELEASE_TO_NEXUSREPO', defaultValue: params.RELEASE_TO_NEXUSREPO ?: false,
-                description: 'Release built and tested image to Nexus Repository')
+                description: 'Enable upload of scan results to Fortify Software Security Center')               
+
+        // The space ID that we will be working with. The default space is typically Spaces-1.
+        string(defaultValue: 'Spaces-1', description: '', name: 'SpaceId', trim: true)
+        // The Octopus project we will be deploying.
+        string(defaultValue: 'Swagger-PetStore', description: '', name: 'ProjectName', trim: true)
+        // The environment we will be deploying to.
+        string(defaultValue: 'Dev', description: '', name: 'EnvironmentName', trim: true)
+        // The name of the Octopus instance in Jenkins that we will be working with. This is set in:
+        // Manage Jenkins -> Configure System -> Octopus Deploy Plugin
+        string(defaultValue: 'Octopus Deploy', description: '', name: 'ServerId', trim: true)
     }
     
     environment {
         // Application settings
         APP_NAME = "Swagger-PetStore"
-        APP_VER = "1.0.7"     
+        APP_VER = "1.0."     
         COMPONENT_NAME = "swagger-petstore"
         GIT_URL = "https://github.com/rudiansen/swagger-petstore"
         JAVA_VERSION = 8
@@ -61,9 +69,9 @@ pipeline {
             post {
                 success {                   
                     // Archive the built file
-                    archiveArtifacts "target/${env.COMPONENT_NAME}-${env.APP_VER}.war"
+                    archiveArtifacts "target/${env.COMPONENT_NAME}-${env.APP_VER}${BUILD_NUMBER}.war"
                     // Stash the deployable files
-                    stash includes: "target/${env.COMPONENT_NAME}-${env.APP_VER}.war", name: "${env.COMPONENT_NAME}-${env.APP_VER}_release"
+                    stash includes: "target/${env.COMPONENT_NAME}-${env.APP_VER}${BUILD_NUMBER}.war", name: "${env.COMPONENT_NAME}-${env.APP_VER}${BUILD_NUMBER}_release"
                 }
             }
         }
@@ -133,34 +141,27 @@ pipeline {
                 sh 'cat ./scantoken.txt'
 
                 //  Check scanning status until it's completed                
-                pwsh label: 'Check ScanCentral scan status', returnStatus: true, script: './powershell/check_scan_status.ps1'                                      
+                pwsh label: 'Check ScanCentral scan status', returnStatus: true, script: './powershell/scancentral_scan_status_check.ps1'                                      
             }
         }
 
-        stage("Build Docker image and push to Nexus Repo") {            
+        stage("Publish Docker image to Nexus Repository") {            
             steps {
-                // Get some code from a GitHub repository                
-                git branch: 'poc-sss', url: "${env.GIT_URL}"
-                
-                script {
-                    withDockerServer([uri: 'tcp://10.87.1.236:2375']) {
-                        withDockerRegistry(credentialsId: 'DockerCredentialsNexusRepos', url: "${env.NEXUS_REPOSITORY_URL}") {
-                            def customImage = docker.build("10.87.1.60:8083/${env.COMPONENT_NAME}:${env.APP_VER}-${env.BUILD_ID}")
-                            /* Push the container to the custom Registry */
-                            customImage.push()
+                // Create archive file (.tar) for docker image build process
+                sh 'tar --create --exclude=\'.git*\' --exclude=\'*.tar\' --file swagger-petstore.tar *'
 
-                            customImage.push('latest')
-                        }                        
-                    }                    
-                }
-
-                // pwsh 'Write-Output "Docker build step and upload to Nexus Repos go here..."'               
+                // Execute script for docker image build and push to Nexus Repository using Docker REST API
+                pwsh label: 'Docker image build and publish to Nexus Repository', returnStatus: true, script: './powershell/docker_build_and_push_image.ps1'
             }
         }
 
         stage("Deployment using Octopus Deploy") {
             steps {
-                pwsh 'Write-Output "The step for Octopus Deployment goes here..."'
+                // Add Octopus CLI tools
+                sh "echo \"OctoCLI: ${tool('Default')}\""
+
+                octopusCreateRelease additionalArgs: '', cancelOnTimeout: false, channel: '', defaultPackageVersion: '', deployThisRelease: false, deploymentTimeout: '', environment: "${EnvironmentName}", jenkinsUrlLinkback: false, project: "${ProjectName}", releaseNotes: false, releaseNotesFile: '', releaseVersion: "${env.APP_VER}${BUILD_NUMBER}", serverId: "${ServerId}", spaceId: "${SpaceId}", tenant: '', tenantTag: '', toolId: 'Default', verboseLogging: false, waitForDeployment: false
+                octopusDeployRelease cancelOnTimeout: false, deploymentTimeout: '', environment: "${EnvironmentName}", project: "${ProjectName}", releaseVersion: "${env.APP_VER}${BUILD_NUMBER}", serverId: "${ServerId}", spaceId: "${SpaceId}", tenant: '', tenantTag: '', toolId: 'Default', variables: '', verboseLogging: false, waitForDeployment: true                                
             }
         }
 
