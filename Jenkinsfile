@@ -1,6 +1,7 @@
 #!/usr/bin/env groovy
 
 def scanToken
+def appVersion
 
 pipeline {
     agent any
@@ -26,21 +27,14 @@ pipeline {
     
     environment {
         // Application settings
-        APP_NAME = "Swagger-PetStore"
-        APP_VER = "1.0.0"     
+        APP_NAME = "Swagger-PetStore"             
         COMPONENT_NAME = "swagger-petstore"
-        GIT_URL = "https://github.com/rudiansen/swagger-petstore"
-        JAVA_VERSION = 8
-        NEXUS_REPOSITORY_URL = 'http://10.87.1.60:8083'        
+        GIT_URL = "https://github.com/rudiansen/swagger-petstore"                
 
         // The following are defaulted and can be overriden by creating a "Build parameter" of the same name
         SSC_URL = "${params.SSC_URL ?: 'http://10.87.1.12:8080/ssc'}" // URL of Fortify Software Security Center
         SSC_APP_VERSION_ID = "${params.SSC_APP_VERSION_ID ?: '1001'}" // Id of Application in SSC to upload results to        
-        SSC_SENSOR_POOL_UUID = "${params.SSC_SENSOR_POOL_UUID ?: '00000000-0000-0000-0000-000000000002'}" // UUID of Scan Central Sensor Pool to use - leave for Default Pool        
-
-		registry = "10.87.1.60:8083/swagger-petStore"
-		registryCredential = 'DockerCredentialsNexusRepos'
-        dockerImage = ''
+        SSC_SENSOR_POOL_UUID = "${params.SSC_SENSOR_POOL_UUID ?: '00000000-0000-0000-0000-000000000002'}" // UUID of Scan Central Sensor Pool to use - leave for Default Pool
     }
 
     stages {
@@ -48,6 +42,9 @@ pipeline {
             steps {
                 // Get some code from a GitHub repository                
                 git branch: 'poc-sss', url: "${env.GIT_URL}"
+
+                // Get app version from pom.xml file
+                appVersion = readMavenPom().getVersion()
 
                 // Get Git commit details
                 script {
@@ -73,9 +70,9 @@ pipeline {
             post {
                 success {                   
                     // Archive the built file
-                    archiveArtifacts "target/${env.COMPONENT_NAME}-${env.APP_VER}.war"
+                    archiveArtifacts "target/${env.COMPONENT_NAME}-${appVersion}.war"
                     // Stash the deployable files
-                    stash includes: "target/${env.COMPONENT_NAME}-${env.APP_VER}.war", name: "${env.COMPONENT_NAME}-${env.APP_VER}_release"
+                    stash includes: "target/${env.COMPONENT_NAME}-${appVersion}.war", name: "${env.COMPONENT_NAME}-${appVersion}_release"
                 }
             }
         }
@@ -149,13 +146,13 @@ pipeline {
             }
         }
 
-        stage("Publish Docker image to Nexus Repository") {            
+        stage("Publish Docker Image to Nexus Repository") {            
             steps {
                 // Create archive file (.tar) for docker image build process
                 sh 'tar --create --exclude=\'.git*\' --exclude=\'*.tar\' --file swagger-petstore.tar *'
 
                 // Execute script for docker image build and push to Nexus Repository using Docker REST API
-                pwsh label: 'Docker image build and publish to Nexus Repository', returnStatus: true, script: './powershell/docker_build_and_push_image.ps1'
+                pwsh label: 'Docker image build and publish to Nexus Repository', returnStatus: true, script: './powershell/docker_build_and_push_image.ps1 -APP_VERSION ' + "${appVersion}"
             }
         }
 
@@ -164,8 +161,8 @@ pipeline {
                 // Add Octopus CLI tools
                 sh "echo \"OctoCLI: ${tool('Default')}\""
 
-                octopusCreateRelease additionalArgs: '', cancelOnTimeout: false, channel: '', defaultPackageVersion: '', deployThisRelease: false, deploymentTimeout: '', environment: "${EnvironmentName}", jenkinsUrlLinkback: false, project: "${ProjectName}", releaseNotes: false, releaseNotesFile: '', releaseVersion: "${env.APP_VER}", serverId: "${ServerId}", spaceId: "${SpaceId}", tenant: '', tenantTag: '', toolId: 'Default', verboseLogging: false, waitForDeployment: false
-                octopusDeployRelease cancelOnTimeout: false, deploymentTimeout: '', environment: "${EnvironmentName}", project: "${ProjectName}", releaseVersion: "${env.APP_VER}", serverId: "${ServerId}", spaceId: "${SpaceId}", tenant: '', tenantTag: '', toolId: 'Default', variables: '', verboseLogging: false, waitForDeployment: true                                
+                octopusCreateRelease additionalArgs: '', cancelOnTimeout: false, channel: '', defaultPackageVersion: '', deployThisRelease: false, deploymentTimeout: '', environment: "${EnvironmentName}", jenkinsUrlLinkback: false, project: "${ProjectName}", releaseNotes: false, releaseNotesFile: '', releaseVersion: "${appVersion}", serverId: "${ServerId}", spaceId: "${SpaceId}", tenant: '', tenantTag: '', toolId: 'Default', verboseLogging: false, waitForDeployment: false
+                octopusDeployRelease cancelOnTimeout: false, deploymentTimeout: '', environment: "${EnvironmentName}", project: "${ProjectName}", releaseVersion: "${appVersion}", serverId: "${ServerId}", spaceId: "${SpaceId}", tenant: '', tenantTag: '', toolId: 'Default', variables: '', verboseLogging: false, waitForDeployment: true                                
             }
         }
 
