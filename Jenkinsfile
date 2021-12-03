@@ -27,7 +27,7 @@ pipeline {
     environment {
         // Application settings
         APP_NAME = "Swagger-PetStore"
-        APP_VER = "1.0."     
+        APP_VER = "1.0.0"     
         COMPONENT_NAME = "swagger-petstore"
         GIT_URL = "https://github.com/rudiansen/swagger-petstore"
         JAVA_VERSION = 8
@@ -73,9 +73,9 @@ pipeline {
             post {
                 success {                   
                     // Archive the built file
-                    archiveArtifacts "target/${env.COMPONENT_NAME}-${env.APP_VER}${BUILD_NUMBER}.war"
+                    archiveArtifacts "target/${env.COMPONENT_NAME}-${env.APP_VER}.war"
                     // Stash the deployable files
-                    stash includes: "target/${env.COMPONENT_NAME}-${env.APP_VER}${BUILD_NUMBER}.war", name: "${env.COMPONENT_NAME}-${env.APP_VER}${BUILD_NUMBER}_release"
+                    stash includes: "target/${env.COMPONENT_NAME}-${env.APP_VER}.war", name: "${env.COMPONENT_NAME}-${env.APP_VER}_release"
                 }
             }
         }
@@ -164,8 +164,8 @@ pipeline {
                 // Add Octopus CLI tools
                 sh "echo \"OctoCLI: ${tool('Default')}\""
 
-                octopusCreateRelease additionalArgs: '', cancelOnTimeout: false, channel: '', defaultPackageVersion: '', deployThisRelease: false, deploymentTimeout: '', environment: "${EnvironmentName}", jenkinsUrlLinkback: false, project: "${ProjectName}", releaseNotes: false, releaseNotesFile: '', releaseVersion: "${env.APP_VER}${BUILD_NUMBER}", serverId: "${ServerId}", spaceId: "${SpaceId}", tenant: '', tenantTag: '', toolId: 'Default', verboseLogging: false, waitForDeployment: false
-                octopusDeployRelease cancelOnTimeout: false, deploymentTimeout: '', environment: "${EnvironmentName}", project: "${ProjectName}", releaseVersion: "${env.APP_VER}${BUILD_NUMBER}", serverId: "${ServerId}", spaceId: "${SpaceId}", tenant: '', tenantTag: '', toolId: 'Default', variables: '', verboseLogging: false, waitForDeployment: true                                
+                octopusCreateRelease additionalArgs: '', cancelOnTimeout: false, channel: '', defaultPackageVersion: '', deployThisRelease: false, deploymentTimeout: '', environment: "${EnvironmentName}", jenkinsUrlLinkback: false, project: "${ProjectName}", releaseNotes: false, releaseNotesFile: '', releaseVersion: "${env.APP_VER}", serverId: "${ServerId}", spaceId: "${SpaceId}", tenant: '', tenantTag: '', toolId: 'Default', verboseLogging: false, waitForDeployment: false
+                octopusDeployRelease cancelOnTimeout: false, deploymentTimeout: '', environment: "${EnvironmentName}", project: "${ProjectName}", releaseVersion: "${env.APP_VER}", serverId: "${ServerId}", spaceId: "${SpaceId}", tenant: '', tenantTag: '', toolId: 'Default', variables: '', verboseLogging: false, waitForDeployment: true                                
             }
         }
 
