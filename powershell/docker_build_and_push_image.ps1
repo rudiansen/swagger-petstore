@@ -1,6 +1,6 @@
 # Written for PowerShell 7
 param (
-    [string]$APP_VERSION = 'latest'
+    [string]$AppVersion = 'latest'
 )
 
 # Variables
@@ -19,12 +19,12 @@ $headers = @{
     "X-Registry-Config" = $base64EncodedCredentials
 }
 
-$imageName1 = "10.87.1.60:8083%2Fswagger-petstore:" + $APP_VERSION
+$imageName1 = "10.87.1.60:8083%2Fswagger-petstore:" + $AppVersion
 $imageName2 = "10.87.1.60:8083%2Fswagger-petstore:latest"
 
 $queryParams = "t=" + $imageName1
 
-if ($APP_VERSION -ne 'latest') {
+if ($AppVersion -ne 'latest') {
     # Add the current version to be the latest version as well
     $queryParams = $queryParams + "&t=" + $imageName2
 }
@@ -32,7 +32,7 @@ if ($APP_VERSION -ne 'latest') {
 $dockerBuildUrl = $dockerRemoteApiUrl + "/build?" + $queryParams
 
 # Invoke Docker REST API to build an image
-$response = Invoke-RestMethod -AllowUnencryptedAuthentication -Headers $headers -Method POST -InFile $archiveFile -Uri $dockerBuildUrl
+$response = Invoke-RestMethod -AllowUnencryptedAuthentication -Headers $headers -Method POST -InFile $archiveFile -Uri $dockerBuildUrl 
 
 Write-Host $response
 Write-Host -ForegroundColor Green ("Build docker image is finished")
@@ -47,15 +47,15 @@ $headers = @{
 $dockerPushUrlImage1 = $dockerRemoteApiUrl + "/images/" + $imageName1 + "/push"
 
 # Invoke Docker REST API to push an image to Nexus Repository
-$response1 = Invoke-RestMethod -AllowUnencryptedAuthentication -Headers $headers -Method POST -Uri $dockerPushUrlImage1
+$response1 = Invoke-RestMethod -AllowUnencryptedAuthentication -Headers $headers -Method POST -Uri $dockerPushUrlImage1 
 
 Write-Host $response1
 
-if ($APP_VERSION -ne 'latest') {
+if ($AppVersion -ne 'latest') {
     # Push the latest version (if apply)
     $dockerPushUrlImage2 = $dockerRemoteApiUrl + "/images/" + $imageName2 + "/push"
 
-    $response2 = Invoke-RestMethod -AllowUnencryptedAuthentication -Headers $headers -Method POST -Uri $dockerPushUrlImage2
+    $response2 = Invoke-RestMethod -AllowUnencryptedAuthentication -Headers $headers -Method POST -Uri $dockerPushUrlImage2 
 
     Write-Host $response2
 }

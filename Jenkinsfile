@@ -152,7 +152,7 @@ pipeline {
                 sh 'tar --create --exclude=\'.git*\' --exclude=\'*.tar\' --file swagger-petstore.tar *'
 
                 // Execute script for docker image build and push to Nexus Repository using Docker REST API
-                pwsh label: 'Docker image build and publish to Nexus Repository', returnStatus: true, script: './powershell/docker_build_and_push_image.ps1 -APP_VERSION ' + "${appVersion}"
+                pwsh label: 'Docker image build and publish to Nexus Repository', returnStatus: true, script: './powershell/docker_build_and_push_image.ps1 -AppVersion ' + "${appVersion}"
             }
         }
 
@@ -161,8 +161,8 @@ pipeline {
                 // Add Octopus CLI tools
                 sh "echo \"OctoCLI: ${tool('Default')}\""
 
-                octopusCreateRelease additionalArgs: '', cancelOnTimeout: false, channel: '', defaultPackageVersion: '', deployThisRelease: false, deploymentTimeout: '', environment: "${EnvironmentName}", jenkinsUrlLinkback: false, project: "${ProjectName}", releaseNotes: false, releaseNotesFile: '', releaseVersion: "${appVersion}", serverId: "${ServerId}", spaceId: "${SpaceId}", tenant: '', tenantTag: '', toolId: 'Default', verboseLogging: false, waitForDeployment: false
-                octopusDeployRelease cancelOnTimeout: false, deploymentTimeout: '', environment: "${EnvironmentName}", project: "${ProjectName}", releaseVersion: "${appVersion}", serverId: "${ServerId}", spaceId: "${SpaceId}", tenant: '', tenantTag: '', toolId: 'Default', variables: '', verboseLogging: false, waitForDeployment: true                                
+                octopusCreateRelease additionalArgs: '', cancelOnTimeout: false, channel: '', defaultPackageVersion: '', deployThisRelease: false, deploymentTimeout: '', environment: "${EnvironmentName}", jenkinsUrlLinkback: false, project: "${ProjectName}", releaseNotes: false, releaseNotesFile: '', releaseVersion: "${appVersion}-${BUILD_NUMBER}", serverId: "${ServerId}", spaceId: "${SpaceId}", tenant: '', tenantTag: '', toolId: 'Default', verboseLogging: false, waitForDeployment: false
+                octopusDeployRelease cancelOnTimeout: false, deploymentTimeout: '', environment: "${EnvironmentName}", project: "${ProjectName}", releaseVersion: "${appVersion}-${BUILD_NUMBER}", serverId: "${ServerId}", spaceId: "${SpaceId}", tenant: '', tenantTag: '', toolId: 'Default', variables: '', verboseLogging: false, waitForDeployment: true                                
             }
         }
 
