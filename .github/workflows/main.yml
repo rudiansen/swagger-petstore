@@ -1,0 +1,30 @@
+name: CI with Jenkins
+
+on:
+  # Triggers the workflow on push events but only for the poc-sss branch
+  push:    
+    branches: [ poc-sss ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    # The type of runner that the job will run on
+    runs-on: self-hosted
+
+    steps:
+      # Trigger on-premises Jenkins to run the CI/CD pipelines
+      - name: Trigger on-premises Jenkins build
+        run: |
+          # Parameters
+          urlOfJenkinsServer="http://10.87.1.239:8080"
+          jenkinsJobName="Swagger-PetStore"
+          userName="admin"
+          password="11967e544676bd1284f612e554162a6b31"
+
+          #Generate Crumb value
+          CRUMB=`curl -s -u "$userName:$password" $urlOfJenkinsServer'/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,":",//crumb)'`
+          TriggerResponse=$(curl -I -s -X POST -u "$userName:$password" -H "$CRUMB" "$urlOfJenkinsServer"/job/"$jenkinsJobName"/build)
+
+          echo $TriggerResponse
