@@ -37,6 +37,10 @@ pipeline {
         SSC_URL = "${params.SSC_URL ?: 'http://10.87.1.12:8080/ssc'}" // URL of Fortify Software Security Center
         SSC_APP_VERSION_ID = "${params.SSC_APP_VERSION_ID ?: '1001'}" // Id of Application in SSC to upload results to        
         SSC_SENSOR_POOL_UUID = "${params.SSC_SENSOR_POOL_UUID ?: '00000000-0000-0000-0000-000000000002'}" // UUID of Scan Central Sensor Pool to use - leave for Default Pool        
+
+		registry = "10.87.1.60:8083/swagger-petStore"
+		registryCredential = 'DockerCredentialsNexusRepos'
+        dockerImage = ''
     }
 
     stages {
