@@ -41,10 +41,7 @@ pipeline {
         stage('Build') {            
             steps {
                 // Get some code from a GitHub repository                
-                git branch: 'poc-sss', url: "${env.GIT_URL}"
-
-                // Get app version from pom.xml file
-                appVersion = sh script: 'mvn help:evaluate -Dexpression=project.version -q -DforceStdout', returnStdout: true
+                git branch: 'poc-sss', url: "${env.GIT_URL}"                
 
                 // Get Git commit details
                 script {
@@ -64,6 +61,9 @@ pipeline {
                     } else {
                         bat "mvn \"-Dskip.unit.tests=false\" Dtest=\"*Test,!PasswordConstraintValidatorTest,!UserServiceTest,!DefaultControllerTest,!SeleniumFlowIT\" -DfailIfNoTests=false -B clean verify package --file pom.xml"
                     }
+
+                    // Get app version from pom.xml file
+                    appVersion = sh script: 'mvn help:evaluate -Dexpression=project.version -q -DforceStdout', returnStdout: true
                 }
             }
 
