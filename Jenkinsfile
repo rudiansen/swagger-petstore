@@ -44,7 +44,7 @@ pipeline {
                 git branch: 'poc-sss', url: "${env.GIT_URL}"
 
                 // Get app version from pom.xml file
-                appVersion = readMavenPom().getVersion()
+                appVersion = sh script: 'mvn help:evaluate -Dexpression=project.version -q -DforceStdout', returnStdout: true
 
                 // Get Git commit details
                 script {
