@@ -2,7 +2,7 @@
 #Variables
 $wiAPIurl = '10.87.1.95:8083'
 $sscURL = 'http://10.87.1.12:8080/ssc/'
-$applicationVersionID = '10028'
+$applicationVersionID = '10026' # Application version ID in Fortify SSC for Swagger-PetStore
 $sscToken = 'NjMyMDBhZjUtYWNjZC00MmUwLThiZGUtYWI1ZDg3YmFlMDM2'
 
 $scanURL = 'http://10.87.1.236:30005/'
