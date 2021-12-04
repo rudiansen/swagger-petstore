@@ -24,6 +24,6 @@ jobs:
         run: |
           #Generate Crumb value
           CRUMB=`curl -s -u "$userName:$password" $urlOfJenkinsServer'/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,":",//crumb)'`
-          TriggerResponse=$(curl -I -s -X POST -u "$userName:$password" -H "$CRUMB" "$urlOfJenkinsServer"/job/"$jenkinsJobName"/build)
+          TriggerResponse=$(curl -I -s -X POST -u "$userName:$password" -H "$CRUMB" "$urlOfJenkinsServer"/job/"$jenkinsJobName"/buildWithParameters)
 
           echo $TriggerResponse
