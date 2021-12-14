@@ -206,7 +206,7 @@ pipeline {
 
             post {
                 always {
-                    archiveArtifacts artifacts: 'tfplan.txt'
+                    archiveArtifacts artifacts: 'terraform/tfplan.txt'
                 }
             }
         }
