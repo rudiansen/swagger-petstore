@@ -29,3 +29,8 @@ variable "node_port" {
   type        = number
   default     = 30000
 }
+
+variable "container_image_version" {
+  description = "The version of container image"
+  default = "latest"
+}

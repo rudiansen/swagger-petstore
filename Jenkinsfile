@@ -177,13 +177,16 @@ pipeline {
                 dir("terraform") {
                     sh 'pwd'
                     sh 'terraform init'                
-                    sh "terraform plan -out tfplan -var-file=environments/${params.environment}.tfvars"
+                    sh "terraform plan -out tfplan -var-file=environments/${params.environment}.tfvars -var container_image_version=${appVersion}"
                     sh "terraform show -no-color tfplan > tfplan.txt"
                 }                                                
             }
         }
 
         stage("Deployment Approval") {
+            // Run Terraform command on kubectl node
+            agent {label 'kubectl'}
+            
             when {
                 not {
                     equals expected: true, actual: params.autoApprove

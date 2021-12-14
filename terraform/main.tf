@@ -42,7 +42,7 @@ resource "kubernetes_deployment" "swagger-petstore" {
       }
       spec {
         container {
-          image = var.container_image
+          image = format("%s:%s", var.container_image, var.container_image_version)
           name  = "swagger-petstore-container"
           port {
             container_port = var.container_port
