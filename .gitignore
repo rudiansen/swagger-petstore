@@ -11,3 +11,6 @@ atlassian-ide-plugin.xml
 *.iml
 .java-version
 *.tar
+
+# Ignore Terraform state files
+**/.terraform*

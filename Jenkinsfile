@@ -14,15 +14,20 @@ pipeline {
         booleanParam(name: 'UPLOAD_TO_SSC',		defaultValue: params.UPLOAD_TO_SSC ?: false,
                 description: 'Enable upload of scan results to Fortify Software Security Center')               
 
+        // === Parameters used for deployment using Octopus Deploy ===
         // The space ID that we will be working with. The default space is typically Spaces-1.
-        string(defaultValue: 'Spaces-1', description: '', name: 'SpaceId', trim: true)
+        // string(defaultValue: 'Spaces-1', description: '', name: 'SpaceId', trim: true)
         // The Octopus project we will be deploying.
-        string(defaultValue: 'Swagger-PetStore', description: '', name: 'ProjectName', trim: true)
+        // string(defaultValue: 'Swagger-PetStore', description: '', name: 'ProjectName', trim: true)
         // The environment we will be deploying to.
-        string(defaultValue: 'Dev', description: '', name: 'EnvironmentName', trim: true)
+        // string(defaultValue: 'Dev', description: '', name: 'EnvironmentName', trim: true)
         // The name of the Octopus instance in Jenkins that we will be working with. This is set in:
         // Manage Jenkins -> Configure System -> Octopus Deploy Plugin
-        string(defaultValue: 'Octopus Deploy', description: '', name: 'ServerId', trim: true)
+        // string(defaultValue: 'Octopus Deploy', description: '', name: 'ServerId', trim: true)
+
+        // === Parameters used for deployment using Terraform ===
+        string(name: 'environment', defaultValue: 'default', description: 'environment file to use for deployment')           
+        booleanParam(name: 'autoApprove', defaultValue: 'true', description: 'Automatically run apply after generating plan?')
     }
     
     environment {
@@ -156,15 +161,51 @@ pipeline {
             }
         }
 
-        stage("Deployment using Octopus Deploy") {
+        stage("Initialize Terraform"){
             steps {
-                // Add Octopus CLI tools
-                sh "echo \"OctoCLI: ${tool('Default')}\""
-
-                octopusCreateRelease additionalArgs: '', cancelOnTimeout: false, channel: '', defaultPackageVersion: '', deployThisRelease: false, deploymentTimeout: '', environment: "${EnvironmentName}", jenkinsUrlLinkback: false, project: "${ProjectName}", releaseNotes: false, releaseNotesFile: '', releaseVersion: "${appVersion}-${BUILD_NUMBER}", serverId: "${ServerId}", spaceId: "${SpaceId}", tenant: '', tenantTag: '', toolId: 'Default', verboseLogging: false, waitForDeployment: false
-                octopusDeployRelease cancelOnTimeout: false, deploymentTimeout: '', environment: "${EnvironmentName}", project: "${ProjectName}", releaseVersion: "${appVersion}-${BUILD_NUMBER}", serverId: "${ServerId}", spaceId: "${SpaceId}", tenant: '', tenantTag: '', toolId: 'Default', variables: '', verboseLogging: false, waitForDeployment: true                                
+                sh 'terraform init'                
+                sh 'terraform plan -out tfplan -var-file="environments/${params.environment}.tfvars"'
+                sh 'terraform show -no-color tfplan > tfplan.txt'
             }
         }
+
+        stage("Deployment Approval") {
+            when {
+                not {
+                    equals expected: true, actual: params.autoApprove
+                }
+            }
+
+            steps {
+                script {
+                    def plan = readFile 'tfplan.txt'
+                    input message: "Do you want to apply the plan?",
+                        parameters: [text(name: 'Plan', description: 'Please review the plan', defaultValue: plan)]
+                }
+                
+                post {
+                    always {
+                        archiveArtifacts artifacts: 'tfplan.txt'
+                    }
+                }
+            }
+        }
+
+        stage("Apply Deployment using Terraform") {
+            steps {
+                sh 'terraform apply -input=false tfplan'
+            }
+        }
+
+        // stage("Deployment using Octopus Deploy") {
+        //     steps {
+        //         // Add Octopus CLI tools
+        //         sh "echo \"OctoCLI: ${tool('Default')}\""
+
+        //         octopusCreateRelease additionalArgs: '', cancelOnTimeout: false, channel: '', defaultPackageVersion: '', deployThisRelease: false, deploymentTimeout: '', environment: "${EnvironmentName}", jenkinsUrlLinkback: false, project: "${ProjectName}", releaseNotes: false, releaseNotesFile: '', releaseVersion: "${appVersion}-${BUILD_NUMBER}", serverId: "${ServerId}", spaceId: "${SpaceId}", tenant: '', tenantTag: '', toolId: 'Default', verboseLogging: false, waitForDeployment: false
+        //         octopusDeployRelease cancelOnTimeout: false, deploymentTimeout: '', environment: "${EnvironmentName}", project: "${ProjectName}", releaseVersion: "${appVersion}-${BUILD_NUMBER}", serverId: "${ServerId}", spaceId: "${SpaceId}", tenant: '', tenantTag: '', toolId: 'Default', variables: '', verboseLogging: false, waitForDeployment: true                                
+        //     }
+        // }
 
         stage("Fortify WebInpsect - DAST") {
             steps {
