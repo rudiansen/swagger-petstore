@@ -178,7 +178,7 @@ pipeline {
                     sh 'pwd'
                     sh 'terraform init'                
                     sh "terraform plan -out tfplan -var-file=environments/${params.environment}.tfvars"
-                    sh 'terraform show -no-color tfplan > tfplan.txt'
+                    sh "terraform show -no-color tfplan > ${env.WORKSPACE}/terraform/tfplan.txt"
                 }                                                
             }
         }
@@ -192,14 +192,14 @@ pipeline {
 
             steps {
                 script {
-                    def plan = readFile 'terraform/tfplan.txt'
+                    def plan = readFile "${env.WORKSPACE}/terraform/tfplan.txt"
                     input message: "Do you want to apply the plan?",
                         parameters: [text(name: 'Plan', description: 'Please review the plan', defaultValue: plan)]
                 }
                 
                 post {
                     always {
-                        archiveArtifacts artifacts: 'terraform/tfplan.txt'
+                        archiveArtifacts artifacts: "${env.WORKSPACE}/terraform/tfplan.txt"
                     }
                 }
             }
