@@ -174,10 +174,12 @@ pipeline {
 
                 sh 'terraform version'
                 // Change working directory to terraform
-                sh "cd terraform"
-                sh 'terraform init'                
-                sh "terraform plan -out tfplan -var-file=environments/${params.environment}.tfvars"
-                sh 'terraform show -no-color tfplan > tfplan.txt'
+                dir("terraform") {
+                    sh 'pwd'
+                    sh 'terraform init'                
+                    sh "terraform plan -out tfplan -var-file=environments/${params.environment}.tfvars"
+                    sh 'terraform show -no-color tfplan > tfplan.txt'
+                }                                                
             }
         }
 
@@ -190,14 +192,14 @@ pipeline {
 
             steps {
                 script {
-                    def plan = readFile 'tfplan.txt'
+                    def plan = readFile 'terraform/tfplan.txt'
                     input message: "Do you want to apply the plan?",
                         parameters: [text(name: 'Plan', description: 'Please review the plan', defaultValue: plan)]
                 }
                 
                 post {
                     always {
-                        archiveArtifacts artifacts: 'tfplan.txt'
+                        archiveArtifacts artifacts: 'terraform/tfplan.txt'
                     }
                 }
             }
@@ -208,7 +210,10 @@ pipeline {
             agent {label 'kubectl'}
 
             steps {
-                sh 'terraform apply -input=false tfplan'
+                // Change working directory to terraform
+                dir("terraform") {
+                    sh 'terraform apply -input=false tfplan'
+                }                
             }
         }
 
