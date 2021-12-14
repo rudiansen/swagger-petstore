@@ -162,6 +162,9 @@ pipeline {
         }
 
         stage("Initialize Terraform"){
+            // Run Terraform command on kubectl node
+            agent {label 'kubectl'}
+
             steps {
                 script {
                     // Set Terraform path
@@ -171,7 +174,7 @@ pipeline {
 
                 sh 'terraform version'
                 // Change working directory to terraform
-                sh "cd ${env.WORKSPACE}/terraform"
+                sh "cd terraform"
                 sh 'terraform init'                
                 sh "terraform plan -out tfplan -var-file=environments/${params.environment}.tfvars"
                 sh 'terraform show -no-color tfplan > tfplan.txt'
@@ -201,6 +204,9 @@ pipeline {
         }
 
         stage("Apply Deployment using Terraform") {
+            // Run Terraform command on kubectl node
+            agent {label 'kubectl'}
+
             steps {
                 sh 'terraform apply -input=false tfplan'
             }
