@@ -26,7 +26,7 @@ pipeline {
         // string(defaultValue: 'Octopus Deploy', description: '', name: 'ServerId', trim: true)
 
         // === Parameters used for deployment using Terraform ===
-        string(name: 'environment', defaultValue: 'default', description: 'environment file to use for deployment')           
+        string(name: 'environment', defaultValue: 'dev', description: 'environment file to use for deployment')           
         booleanParam(name: 'autoApprove', defaultValue: 'true', description: 'Automatically run apply after generating plan?')
     }
     
