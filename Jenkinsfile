@@ -163,6 +163,13 @@ pipeline {
 
         stage("Initialize Terraform"){
             steps {
+                script {
+                    // Set Terraform path
+                    def tfHome = tool name: 'Terraform'
+                    env.PATH = "${tfHome}:${env.PATH}"
+                }
+
+                sh 'terraform version'
                 sh 'terraform init'                
                 sh 'terraform plan -out tfplan -var-file="environments/${params.environment}.tfvars"'
                 sh 'terraform show -no-color tfplan > tfplan.txt'
