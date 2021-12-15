@@ -10,6 +10,6 @@ COPY appd-javaagent /opt/appdynamics/
 
 EXPOSE 8080
 
-ENV JAVA_OPTS -javaagent:/opt/appdynamics/javaagent.jar
+# ENV JAVA_OPTS -javaagent:/opt/appdynamics/javaagent.jar
 
-CMD ["java", "${JAVA_OPTS}", "-jar", "-DswaggerUrl=openapi.yaml", "/swagger-petstore/jetty-runner.jar", "--log", "/var/log/yyyy_mm_dd-requests.log", "/swagger-petstore/server.war"]
+CMD ["java", "-jar", "-DswaggerUrl=openapi.yaml", "/swagger-petstore/jetty-runner.jar", "--log", "/var/log/yyyy_mm_dd-requests.log", "/swagger-petstore/server.war"]
