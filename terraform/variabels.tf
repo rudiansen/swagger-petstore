@@ -34,3 +34,9 @@ variable "container_image_version" {
   description = "The version of container image"
   default = "latest"
 }
+
+variable "build_number" {
+  description = "The build number of Jenkins pipeline"
+  type        = number
+  default     = 0
+}

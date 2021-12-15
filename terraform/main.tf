@@ -24,7 +24,7 @@ resource "kubernetes_namespace" "swagger-petstore" {
 
 resource "kubernetes_deployment" "swagger-petstore" {
   metadata {
-    name      = var.metadata_name
+    name      = format("%s-%d", var.metadata_name, var.build_number)
     namespace = kubernetes_namespace.swagger-petstore.metadata.0.name
   }
   spec {

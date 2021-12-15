@@ -177,7 +177,7 @@ pipeline {
                 dir("terraform") {
                     sh 'pwd'
                     sh 'terraform init'                
-                    sh "terraform plan -out tfplan -var-file=environments/${params.environment}.tfvars -var container_image_version=${appVersion}"
+                    sh "terraform plan -out tfplan -var-file=environments/${params.environment}.tfvars -var container_image_version=${appVersion} -var build_number=${env.BUILD_NUMBER}"
                     sh "terraform show -no-color tfplan > tfplan.txt"
                 }                                                
             }
