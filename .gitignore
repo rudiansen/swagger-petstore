@@ -14,3 +14,4 @@ atlassian-ide-plugin.xml
 
 # Ignore Terraform state files
 **/.terraform*
+**/tfplan
