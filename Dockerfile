@@ -6,7 +6,8 @@ COPY target/lib/jetty-runner.jar /swagger-petstore/jetty-runner.jar
 COPY target/*.war /swagger-petstore/server.war
 COPY src/main/resources/openapi.yaml /swagger-petstore/openapi.yaml
 COPY inflector.yaml /swagger-petstore/
+COPY appd-javaagent/* /swagger-petstore/appd-javaagent/
 
 EXPOSE 8080
 
-CMD ["java", "-jar", "-DswaggerUrl=openapi.yaml", "/swagger-petstore/jetty-runner.jar", "--log", "/var/log/yyyy_mm_dd-requests.log", "/swagger-petstore/server.war"]
+CMD ["java", "-javaagent:/swagger-petstore/appd-javaagent/javaagent.jar", "-jar", "-DswaggerUrl=openapi.yaml", "/swagger-petstore/jetty-runner.jar", "--log", "/var/log/yyyy_mm_dd-requests.log", "/swagger-petstore/server.war"]
