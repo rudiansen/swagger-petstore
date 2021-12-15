@@ -32,7 +32,7 @@ variable "node_port" {
 
 variable "container_image_version" {
   description = "The version of container image"
-  default = "latest"
+  default     = "latest"
 }
 
 variable "build_number" {
