@@ -51,6 +51,19 @@ resource "kubernetes_secret" "appd-secret" {
   }
 }
 
+resource "kubernetes_secret" "quay-regcred" {
+  metadata {
+    name      = "quay-regcred"
+    namespace = kubernetes_namespace.swagger-petstore.metadata.0.name
+  }
+
+  data = {
+    ".dockerconfigjson" = "${file("${path.module}/.docker/config.json")}"
+  }
+
+  type = "kubernetes.io/dockerconfigjson"
+}
+
 resource "kubernetes_deployment" "swagger-petstore" {
   metadata {
     name      = format("%s-%d", var.metadata_name, var.build_number)
@@ -97,6 +110,9 @@ resource "kubernetes_deployment" "swagger-petstore" {
           image_pull_policy = "IfNotPresent"
         }
         restart_policy = "Always"
+        image_pull_secrets {
+          name = kubernetes_secret.quay-regcred.metadata.0.name
+        }
       }
     }
   }
