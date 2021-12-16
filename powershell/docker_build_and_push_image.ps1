@@ -19,8 +19,8 @@ $headers = @{
     "X-Registry-Config" = $base64EncodedCredentials
 }
 
-$imageName1 = "10.87.1.60:8083%2Fswagger-petstore:" + $AppVersion
-$imageName2 = "10.87.1.60:8083%2Fswagger-petstore:latest"
+$imageName1 = "swagger-petstore:" + $AppVersion
+$imageName2 = "swagger-petstore:latest"
 
 $queryParams = "t=" + $imageName1
 
@@ -38,7 +38,7 @@ Write-Host $response
 Write-Host -ForegroundColor Green ("Build docker image is finished")
 
 # Push docker image to Nexus Repository
-Write-Host -ForegroundColor Green ("Push docker image to Nexus Repository is starting...")
+Write-Host -ForegroundColor Green ("Push docker image to internal registry is starting...")
 
 $headers = @{
     "X-Registry-Auth" = $base64EncodedCredentials
@@ -60,4 +60,4 @@ if ($AppVersion -ne 'latest') {
     Write-Host $response2
 }
 
-Write-Host -ForegroundColor Green ("Push docker image to Nexus Repository is finished")
+Write-Host -ForegroundColor Green ("Push docker image to internal registry is finished")
