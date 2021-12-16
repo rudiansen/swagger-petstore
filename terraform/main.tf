@@ -30,7 +30,7 @@ resource "kubernetes_config_map" "agent-config-cm" {
 
   data = {
     APPDYNAMICS_AGENT_APPLICATION_NAME : "Swagger-PetStore"
-    APPDYNAMICS_AGENT_ACCOUNT_NAME : "swagger-petstore"
+    APPDYNAMICS_AGENT_ACCOUNT_NAME : "ptpacket"
     APPDYNAMICS_CONTROLLER_HOST_NAME : "ptpacket.saas.appdynamics.com"
     APPDYNAMICS_CONTROLLER_PORT : "443"
     APPDYNAMICS_CONTROLLER_SSL_ENABLED : "true"
