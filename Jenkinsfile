@@ -157,7 +157,7 @@ pipeline {
                 sh 'tar --create --exclude=\'.git*\' --exclude=\'*.tar\' --file swagger-petstore.tar *'
 
                 // Execute script for docker image build and push to Nexus Repository using Docker REST API
-                pwsh label: 'Docker image build and publish to Docker Internal Registry', returnStatus: true, script: './powershell/docker_build_and_push_image.ps1 -AppVersion ' + "${appVersion}"
+                pwsh label: 'Docker image build and publish to quay.io container Registry', returnStatus: true, script: './powershell/docker_build_and_push_image.ps1 -AppVersion ' + "${appVersion}"
             }
         }
 

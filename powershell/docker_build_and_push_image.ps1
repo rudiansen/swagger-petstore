@@ -12,15 +12,16 @@ Write-Host -ForegroundColor Green ("Build docker image is starting...")
 
 # The base64EncodedCredentials is the base64 encoded value of username, password and serveraddress
 # Please see the following reference https://docs.docker.com/engine/api/v1.41/#section/Authentication
-$base64EncodedCredentials = "eyJ1c2VybmFtZSI6ImFkbWluIiwgInBhc3N3b3JkIjogIlBAc3N3MHJkITIzNCIsICJzZXJ2ZXJhZGRyZXNzIjogIjEwLjg3LjEuNjA6ODA4MyJ9"
+# Use credentials for login to quay.io
+$base64EncodedCredentials = "eyJ1c2VybmFtZSI6InJ1ZGlhbnNlbl9ndW5hd2FuIiwgInBhc3N3b3JkIjogIk1meGhzWnhRejBxWmNySStJa1ZERFFvL2lNWGdmVGxBVk9ZNDdXMWJ4SXpVaW1NYmJnTWhqbW1SSkFGS2NsWmIiLCAic2VydmVyYWRkcmVzcyI6ICJxdWF5LmlvIn0="
 
 $headers = @{
     "Content-Type" = "application/x-tar"
     "X-Registry-Config" = $base64EncodedCredentials
 }
 
-$imageName1 = "swagger-petstore:" + $AppVersion
-$imageName2 = "swagger-petstore:latest"
+$imageName1 = "quay.io/rudiansen_gunawan/swagger-petstore:" + $AppVersion
+$imageName2 = "quay.io/rudiansen_gunawan/swagger-petstore:latest"
 
 $queryParams = "t=" + $imageName1
 
@@ -38,7 +39,7 @@ Write-Host $response
 Write-Host -ForegroundColor Green ("Build docker image is finished")
 
 # Push docker image to Nexus Repository
-Write-Host -ForegroundColor Green ("Push docker image to internal registry is starting...")
+Write-Host -ForegroundColor Green ("Push docker image to quay.io is starting...")
 
 $headers = @{
     "X-Registry-Auth" = $base64EncodedCredentials
@@ -60,4 +61,4 @@ if ($AppVersion -ne 'latest') {
     Write-Host $response2
 }
 
-Write-Host -ForegroundColor Green ("Push docker image to internal registry is finished")
+Write-Host -ForegroundColor Green ("Push docker image to quay.io is finished")
