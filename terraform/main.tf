@@ -58,7 +58,7 @@ resource "kubernetes_secret" "quay-regcred" {
   }
 
   data = {
-    ".dockerconfigjson" = "${file("${path.module}/.docker/config.json")}"
+    ".dockerconfigjson" = "${file("~/.docker/config.json")}"
   }
 
   type = "kubernetes.io/dockerconfigjson"
