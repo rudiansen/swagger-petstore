@@ -39,7 +39,7 @@
           </elementProp>
           <elementProp name="" elementType="Header">
             <stringProp name="Header.name">Accept</stringProp>
-            <stringProp name="Header.value">application/xml</stringProp>
+            <stringProp name="Header.value">application/json</stringProp>
           </elementProp>
         </collectionProp>
       </HeaderManager>
@@ -291,15 +291,6 @@ props.setProperty(&quot;AppD_Start_Time&quot;, startTest);</stringProp>
         </hashTree>
         <TestFragmentController guiclass="TestFragmentControllerGui" testclass="TestFragmentController" testname="Scenario 2 - Store" enabled="true"/>
         <hashTree>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
-            <collectionProp name="HeaderManager.headers">
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Accept</stringProp>
-                <stringProp name="Header.value">application/json</stringProp>
-              </elementProp>
-            </collectionProp>
-          </HeaderManager>
-          <hashTree/>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Store_Create_New" enabled="true">
             <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
@@ -352,15 +343,6 @@ props.setProperty(&quot;AppD_Start_Time&quot;, startTest);</stringProp>
             <stringProp name="HTTPSampler.response_timeout"></stringProp>
           </HTTPSamplerProxy>
           <hashTree/>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
-            <collectionProp name="HeaderManager.headers">
-              <elementProp name="" elementType="Header">
-                <stringProp name="Header.name">Accept</stringProp>
-                <stringProp name="Header.value">application/xml</stringProp>
-              </elementProp>
-            </collectionProp>
-          </HeaderManager>
-          <hashTree/>
           <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Store_Get_By_ID" enabled="true">
             <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
               <collectionProp name="Arguments.arguments"/>
@@ -370,6 +352,63 @@ props.setProperty(&quot;AppD_Start_Time&quot;, startTest);</stringProp>
             <stringProp name="HTTPSampler.protocol"></stringProp>
             <stringProp name="HTTPSampler.contentEncoding"></stringProp>
             <stringProp name="HTTPSampler.path">/api/v3/store/order/10</stringProp>
+            <stringProp name="HTTPSampler.method">GET</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree/>
+        </hashTree>
+        <TestFragmentController guiclass="TestFragmentControllerGui" testclass="TestFragmentController" testname="Scenario 3 - User" enabled="true"/>
+        <hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="User_Create_New" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{&#xd;
+  &quot;id&quot;: 1001,&#xd;
+  &quot;username&quot;: &quot;psidev&quot;,&#xd;
+  &quot;firstName&quot;: &quot;John&quot;,&#xd;
+  &quot;lastName&quot;: &quot;James&quot;,&#xd;
+  &quot;email&quot;: &quot;john@email.com&quot;,&#xd;
+  &quot;password&quot;: &quot;12345&quot;,&#xd;
+  &quot;phone&quot;: &quot;12345&quot;,&#xd;
+  &quot;userStatus&quot;: 1&#xd;
+}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain"></stringProp>
+            <stringProp name="HTTPSampler.port"></stringProp>
+            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">/api/v3/user</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree/>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="User_Get_By_Name" enabled="true">
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+              <collectionProp name="Arguments.arguments"/>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain"></stringProp>
+            <stringProp name="HTTPSampler.port"></stringProp>
+            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">/api/v3/user/psidev</stringProp>
             <stringProp name="HTTPSampler.method">GET</stringProp>
             <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
             <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
@@ -446,10 +485,18 @@ BufferedReader brLogin = new BufferedReader(new InputStreamReader(conn.getInputS
 if (conn.getResponseCode() == 200) {
 	String headerName = null;
 	String appdCookie = &quot;&quot;;
+	String csrfToken = &quot;&quot;;
 
 	for (int i = 1; (headerName = conn.getHeaderFieldKey(i)) != null; i++) {
 		if (headerName.equals(&quot;Set-Cookie&quot;)) {
-			appdCookie += conn.getHeaderField(i) + &quot; ;&quot;;
+			appdCookie += conn.getHeaderField(i) + &quot;; &quot;;
+			if (conn.getHeaderField(i).contains(&quot;X-CSRF-TOKEN&quot;)) {
+				String csrfTokenStr = conn.getHeaderField(i);
+				
+				csrfToken = csrfTokenStr.substring(&quot;X-CSRF-TOKEN&quot;.length()+1, csrfTokenStr.indexOf(&quot;;&quot;));
+
+				System.out.println(&quot;X-CSRF-TOKEN=&quot; + csrfToken);
+			}
 		}		
 	}
 	System.out.println(&quot;appdCookie = &quot; + appdCookie);
@@ -463,8 +510,9 @@ if (conn.getResponseCode() == 200) {
 	connCustomRange.setRequestProperty(&quot;Content-Type&quot;, &quot;application/json&quot;);
 	connCustomRange.setRequestProperty(&quot;charset&quot;, &quot;utf-8&quot;);
 	connCustomRange.setRequestProperty(&quot;Accept-Encoding&quot;, &quot;gzip, deflate&quot;);
-	connCustomRange.setRequestProperty(&quot;Accept&quot;, &quot;application/json, text/plan&quot;);
+	connCustomRange.setRequestProperty(&quot;Accept&quot;, &quot;application/json, text/plain&quot;);
 	connCustomRange.setRequestProperty(&quot;Cookie&quot;, appdCookie);
+	connCustomRange.setRequestProperty(&quot;X-CSRF-TOKEN&quot;, csrfToken);
 
 	// If the Test Plan name has been correctly in Parameters of this script
 	if (args.length &gt; 0) {
