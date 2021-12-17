@@ -233,6 +233,24 @@ pipeline {
         //     }
         // }
 
+        stage("Performance Testing using JMeter") {
+            // Run performance testing on kubectl node
+            agent {label 'kubectl'}
+
+            steps {
+                dir("jmeter") {
+                    sh '/opt/apache-jmeter-5.4.1/bin/jmeter -j jmeter.save.saveservice.output_format=xml -n -t swagger-petstore-test-plan.jmx -l swagger-petstore.jtl'
+                }                
+            }
+
+            post {
+                success {
+                    // Publish performace testing report to be displayed on Jenkins UI
+                    filterRegex: '', showTrendGraphs: true, sourceDataFiles: '**/*.jtl'
+                }
+            }
+        }
+
         stage("Fortify WebInpsect - DAST") {
             steps {
                 // Execute PowerShell script for WebInspect REST API scanning
