@@ -15,3 +15,6 @@ atlassian-ide-plugin.xml
 # Ignore Terraform state files
 **/.terraform*
 **/tfplan
+
+# Ignore VSCode project settings file
+.vscode
