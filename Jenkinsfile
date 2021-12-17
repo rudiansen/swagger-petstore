@@ -151,7 +151,7 @@ pipeline {
             }
         }
 
-        stage("Publish Docker Image to Nexus Repository") {            
+        stage("Publish Docker Image to Quay.io") {            
             steps {
                 // Create archive file (.tar) for docker image build process
                 sh 'tar --create --exclude=\'.git*\' --exclude=\'*.tar\' --file swagger-petstore.tar *'
