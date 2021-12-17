@@ -246,7 +246,7 @@ pipeline {
             post {
                 success {
                     // Publish performace testing report to be displayed on Jenkins UI
-                    filterRegex: '', showTrendGraphs: true, sourceDataFiles: '**/*.jtl'
+                    perfReport filterRegex: '', showTrendGraphs: true, sourceDataFiles: '**/*.jtl'
                 }
             }
         }
