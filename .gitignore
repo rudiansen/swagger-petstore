@@ -18,3 +18,7 @@ atlassian-ide-plugin.xml
 
 # Ignore VSCode project settings file
 .vscode
+
+# Ignore JMeter related files
+**/jmeter*.log
+**/*.jlt
